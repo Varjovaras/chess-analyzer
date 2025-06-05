@@ -5,6 +5,9 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    // Disable source maps in production to avoid NextAuth parsing issues
+    productionBrowserSourceMaps: false,
+};
 
 export default config;
