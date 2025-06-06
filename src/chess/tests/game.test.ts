@@ -1,7 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Chess } from "../game";
 import { algebraicToSquare } from "../board";
-import type { GameResult } from "../types";
 
 describe("Chess game logic", () => {
     describe("Game initialization", () => {

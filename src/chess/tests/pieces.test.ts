@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getPieceMoves, isValidPieceMove } from "../pieces";
-import { createEmptyBoard, setPieceAt, algebraicToSquare } from "../board";
+import { createEmptyBoard, setPieceAt } from "../board";
 import type { Board, Piece, Square } from "../types";
 
 describe("Piece movements", () => {

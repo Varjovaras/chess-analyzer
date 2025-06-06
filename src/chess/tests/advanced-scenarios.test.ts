@@ -1,34 +1,34 @@
 import { describe, test, expect } from "vitest";
 import { Chess } from "../game";
 import { algebraicToSquare, createEmptyBoard, setPieceAt, createInitialBoard } from "../board";
-import type { Board, Piece, Square, GameState } from "../types";
+import type { GameState } from "../types";
 
 describe("Advanced chess scenarios", () => {
     describe("Castling", () => {
         test("white can castle kingside when conditions are met", () => {
             let game = Chess.newGame();
-            
+
             // Clear pieces between king and rook
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!; // Knight
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
             game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!; // Bishop
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
-            
+
             // Try to castle (this test assumes castling is implemented)
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 move.from.file === 4 && move.from.rank === 0 &&
                 move.to.file === 6 && move.to.rank === 0
             );
-            
+
             // This should pass once castling is implemented
             expect(castlingMoves.length).toBeGreaterThanOrEqual(0);
         });
 
         test("white can castle queenside when conditions are met", () => {
             let game = Chess.newGame();
-            
+
             // Clear pieces between king and queenside rook
             game = game.makeMove(algebraicToSquare("b1")!, algebraicToSquare("c3")!)!; // Knight
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
@@ -36,62 +36,62 @@ describe("Advanced chess scenarios", () => {
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
             game = game.makeMove(algebraicToSquare("d1")!, algebraicToSquare("c2")!)!; // Queen
             game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!; // Black pawn
-            
+
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 move.from.file === 4 && move.from.rank === 0 &&
                 move.to.file === 2 && move.to.rank === 0
             );
-            
+
             expect(castlingMoves.length).toBeGreaterThanOrEqual(0);
         });
 
         test("cannot castle when king has moved", () => {
             let game = Chess.newGame();
-            
+
             // Move king and then back
             game = game.makeMove(algebraicToSquare("e1")!, algebraicToSquare("e2")!)!;
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!;
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e1")!)!;
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!;
-            
+
             // Clear pieces for castling
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
             game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!;
             game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!;
             game = game.makeMove(algebraicToSquare("g7")!, algebraicToSquare("g6")!)!;
-            
+
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 Math.abs(move.to.file - move.from.file) === 2
             );
-            
+
             expect(castlingMoves).toHaveLength(0);
         });
 
         test("cannot castle when rook has moved", () => {
             let game = Chess.newGame();
-            
+
             // Move kingside rook and back
             game = game.makeMove(algebraicToSquare("h1")!, algebraicToSquare("h2")!)!;
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!;
             game = game.makeMove(algebraicToSquare("h2")!, algebraicToSquare("h1")!)!;
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!;
-            
+
             // Clear pieces for castling
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
             game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!;
             game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!;
             game = game.makeMove(algebraicToSquare("g7")!, algebraicToSquare("g6")!)!;
-            
+
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 move.to.file === 6 && move.to.rank === 0
             );
-            
+
             expect(castlingMoves).toHaveLength(0);
         });
 
@@ -120,11 +120,11 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 Math.abs(move.to.file - move.from.file) === 2
             );
-            
+
             expect(castlingMoves).toHaveLength(0);
         });
 
@@ -153,13 +153,13 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             expect(game.isInCheck()).toBe(true);
-            
+
             const validMoves = game.getValidMoves();
-            const castlingMoves = validMoves.filter(move => 
-                move.piece.type === "KING" && 
+            const castlingMoves = validMoves.filter(move =>
+                move.piece.type === "KING" &&
                 Math.abs(move.to.file - move.from.file) === 2
             );
-            
+
             expect(castlingMoves).toHaveLength(0);
         });
     });
@@ -167,10 +167,10 @@ describe("Advanced chess scenarios", () => {
     describe("En passant", () => {
         test("white pawn can capture en passant", () => {
             let game = Chess.newGame();
-            
+
             // Set up en passant scenario
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e5")!)!; // This should be multiple moves
-            
+
             // Manual setup for en passant test
             const board = createEmptyBoard();
             let testBoard = setPieceAt(board, { file: 4, rank: 4 }, { type: "PAWN", color: "WHITE" }); // e5
@@ -199,23 +199,23 @@ describe("Advanced chess scenarios", () => {
 
             const testGame = Chess.fromState(gameState);
             const validMoves = testGame.getValidMoves();
-            const enPassantMoves = validMoves.filter(move => 
-                move.piece.type === "PAWN" && 
+            const enPassantMoves = validMoves.filter(move =>
+                move.piece.type === "PAWN" &&
                 move.from.file === 4 && move.from.rank === 4 &&
                 move.to.file === 3 && move.to.rank === 5
             );
-            
+
             // This test will pass once en passant is implemented
             expect(enPassantMoves.length).toBeGreaterThanOrEqual(0);
         });
 
         test("en passant target is set correctly after double pawn move", () => {
             let game = Chess.newGame();
-            
+
             // Move white pawn, then black pawn two squares
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e4")!)!;
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d5")!)!;
-            
+
             const state = game.getState();
             // En passant target should be set to d6 after black's d7-d5 move
             // This will work once en passant is fully implemented
@@ -224,13 +224,13 @@ describe("Advanced chess scenarios", () => {
 
         test("en passant is only available immediately after double pawn move", () => {
             let game = Chess.newGame();
-            
+
             // Set up position where en passant was possible but another move was made
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e4")!)!;
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d5")!)!;
             game = game.makeMove(algebraicToSquare("f2")!, algebraicToSquare("f3")!)!; // Random move
             game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!; // Random move
-            
+
             const state = game.getState();
             expect(state.enPassantTarget).toBeNull();
         });
@@ -261,7 +261,7 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             const promotionMove = game.makeMove({ file: 4, rank: 6 }, { file: 4, rank: 7 });
-            
+
             if (promotionMove) {
                 const board = promotionMove.getBoard();
                 const promotedPiece = board[7]![4];
@@ -296,11 +296,11 @@ describe("Advanced chess scenarios", () => {
             const game = Chess.fromState(gameState);
             // This test assumes promotion options will be available
             const validMoves = game.getValidMoves();
-            const promotionMoves = validMoves.filter(move => 
-                move.piece.type === "PAWN" && 
+            const promotionMoves = validMoves.filter(move =>
+                move.piece.type === "PAWN" &&
                 move.to.rank === 7
             );
-            
+
             expect(promotionMoves.length).toBeGreaterThan(0);
         });
 
@@ -327,7 +327,7 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             const promotionMove = game.makeMove({ file: 4, rank: 1 }, { file: 4, rank: 0 });
-            
+
             if (promotionMove) {
                 const board = promotionMove.getBoard();
                 const promotedPiece = board[0]![4];
@@ -340,13 +340,13 @@ describe("Advanced chess scenarios", () => {
     describe("Checkmate scenarios", () => {
         test("detects fool's mate (fastest checkmate)", () => {
             let game = Chess.newGame();
-            
+
             // Fool's mate sequence
             game = game.makeMove(algebraicToSquare("f2")!, algebraicToSquare("f3")!)!; // 1. f3
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e5")!)!; // 1... e5
             game = game.makeMove(algebraicToSquare("g2")!, algebraicToSquare("g4")!)!; // 2. g4
             game = game.makeMove(algebraicToSquare("d8")!, algebraicToSquare("h4")!)!; // 2... Qh4#
-            
+
             expect(game.isGameOver()).toBe(true);
             expect(game.getGameResult()).toBe("BLACK_WINS");
             expect(game.isInCheck()).toBe(true);
@@ -354,7 +354,7 @@ describe("Advanced chess scenarios", () => {
 
         test("detects scholar's mate", () => {
             let game = Chess.newGame();
-            
+
             // Scholar's mate sequence
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e4")!)!; // 1. e4
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e5")!)!; // 1... e5
@@ -362,10 +362,10 @@ describe("Advanced chess scenarios", () => {
             game = game.makeMove(algebraicToSquare("b8")!, algebraicToSquare("c6")!)!; // 2... Nc6
             game = game.makeMove(algebraicToSquare("d1")!, algebraicToSquare("h5")!)!; // 3. Qh5
             game = game.makeMove(algebraicToSquare("g8")!, algebraicToSquare("f6")!)!; // 3... Nf6 (defending)
-            
+
             // Try to continue with scholar's mate attempt
             const qh5f7 = game.makeMove(algebraicToSquare("h5")!, algebraicToSquare("f7")!)!; // 4. Qxf7#
-            
+
             if (qh5f7) {
                 expect(qh5f7.isGameOver()).toBe(true);
                 expect(qh5f7.getGameResult()).toBe("WHITE_WINS");
@@ -521,16 +521,16 @@ describe("Advanced chess scenarios", () => {
 
         test("halfmove clock resets on pawn move", () => {
             let game = Chess.newGame();
-            
+
             // Make some moves without pawn moves or captures
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
             game = game.makeMove(algebraicToSquare("g8")!, algebraicToSquare("f6")!)!;
             game = game.makeMove(algebraicToSquare("f3")!, algebraicToSquare("g1")!)!;
             game = game.makeMove(algebraicToSquare("f6")!, algebraicToSquare("g8")!)!;
-            
+
             let state = game.getState();
             expect(state.halfmoveClock).toBe(4);
-            
+
             // Make pawn move
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e4")!)!;
             state = game.getState();
@@ -539,21 +539,21 @@ describe("Advanced chess scenarios", () => {
 
         test("halfmove clock resets on capture", () => {
             let game = Chess.newGame();
-            
+
             // Set up a capture scenario
             game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e4")!)!;
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d5")!)!;
-            
+
             let state = game.getState();
             expect(state.halfmoveClock).toBe(0); // Reset by pawn move
-            
+
             // Make some non-capture moves
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
             game = game.makeMove(algebraicToSquare("g8")!, algebraicToSquare("f6")!)!;
-            
+
             state = game.getState();
             expect(state.halfmoveClock).toBe(2);
-            
+
             // Make capture
             game = game.makeMove(algebraicToSquare("e4")!, algebraicToSquare("d5")!)!;
             state = game.getState();
@@ -671,7 +671,7 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             const discoveredMove = game.makeMove({ file: 4, rank: 5 }, { file: 5, rank: 6 });
-            
+
             if (discoveredMove) {
                 expect(discoveredMove.isInCheck()).toBe(true); // Black king should be in check
             }
@@ -702,7 +702,7 @@ describe("Advanced chess scenarios", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             // Black king should have very limited moves
             expect(validMoves.length).toBeLessThan(8);
             expect(validMoves.every(move => move.piece.type === "KING")).toBe(true);
@@ -841,12 +841,12 @@ describe("Advanced chess scenarios", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // In double check, only king moves are legal
             const validMoves = game.getValidMoves();
             const kingMoves = validMoves.filter(move => move.piece.type === "KING");
             const nonKingMoves = validMoves.filter(move => move.piece.type !== "KING");
-            
+
             expect(nonKingMoves).toHaveLength(0);
             expect(kingMoves.length).toBeGreaterThanOrEqual(0);
         });

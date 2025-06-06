@@ -8,8 +8,6 @@ import "./game.test";
 
 describe("Chess module integration tests", () => {
     test("all test suites are imported and run", () => {
-        // This test ensures all test files are properly imported
-        // Individual tests are in their respective files
         expect(true).toBe(true);
     });
 });

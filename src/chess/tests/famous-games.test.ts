@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { Chess } from "../game";
 import { algebraicToSquare, createEmptyBoard, setPieceAt } from "../board";
-import type { Board, Piece, Square, GameState } from "../types";
+import type { GameState } from "../types";
 
 describe("Famous chess games and tactical patterns", () => {
     describe("Famous checkmate patterns", () => {
@@ -160,7 +160,7 @@ describe("Famous chess games and tactical patterns", () => {
     describe("Famous game sequences", () => {
         test("Immortal Game opening sequence (Anderssen vs Kieseritzky)", () => {
             let game = Chess.newGame();
-            
+
             // The Immortal Game moves
             const moves = [
                 ["e2", "e4"], ["e7", "e5"],    // 1. e4 e5
@@ -169,7 +169,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["e1", "f1"], ["b7", "b5"],   // 4. Kf1 b5
                 ["c4", "b5"], ["g8", "f6"],   // 5. Bxb5 Nf6
             ];
-            
+
             moves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -178,14 +178,14 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             expect(game.getMoveHistory()).toHaveLength(10);
             expect(game.getCurrentPlayer()).toBe("WHITE");
         });
 
         test("Evergreen Game key position (Anderssen vs Dufresne)", () => {
             let game = Chess.newGame();
-            
+
             // Evergreen Game opening moves
             const moves = [
                 ["e2", "e4"], ["e7", "e5"],
@@ -194,7 +194,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["d2", "d4"], ["e5", "d4"],
                 ["f3", "d4"], ["e7", "h4"],
             ];
-            
+
             moves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -203,7 +203,7 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             const board = game.getBoard();
             expect(board[3]![4]?.type).toBe("KNIGHT"); // White knight on d4
             expect(board[3]![7]?.type).toBe("BISHOP"); // Black bishop on h4
@@ -211,7 +211,7 @@ describe("Famous chess games and tactical patterns", () => {
 
         test("Opera Game brilliant sacrifice (Morphy vs Duke and Count)", () => {
             let game = Chess.newGame();
-            
+
             // Paul Morphy's Opera Game
             const moves = [
                 ["e2", "e4"], ["e7", "e5"],
@@ -221,7 +221,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["d1", "f3"], ["d6", "e5"],
                 ["f1", "c4"], ["g8", "f6"],
             ];
-            
+
             moves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -230,7 +230,7 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             // Verify key pieces are in position for the famous sacrifice
             const board = game.getBoard();
             expect(board[2]![2]?.type).toBe("BISHOP"); // White bishop on c4
@@ -239,7 +239,7 @@ describe("Famous chess games and tactical patterns", () => {
 
         test("Game of the Century key moves (Byrne vs Fischer)", () => {
             let game = Chess.newGame();
-            
+
             // Bobby Fischer's Game of the Century
             const moves = [
                 ["g1", "f3"], ["g8", "f6"],
@@ -249,7 +249,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["c1", "f4"], ["d7", "d5"],
                 ["d1", "b3"], ["d5", "c4"],
             ];
-            
+
             // Note: This test assumes castling is implemented
             let moveCount = 0;
             moves.forEach(([from, to]) => {
@@ -262,7 +262,7 @@ describe("Famous chess games and tactical patterns", () => {
                     moveCount++;
                 }
             });
-            
+
             expect(moveCount).toBeGreaterThan(8); // Should complete most moves
         });
     });
@@ -292,13 +292,13 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             // Knight should be able to move to square that attacks both king and rook
-            const forkMoves = validMoves.filter(move => 
+            const forkMoves = validMoves.filter(move =>
                 move.piece.type === "KNIGHT" &&
                 move.from.file === 4 && move.from.rank === 4
             );
-            
+
             expect(forkMoves.length).toBeGreaterThan(0);
         });
 
@@ -326,12 +326,12 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             expect(game.isInCheck()).toBe(true);
-            
+
             // King must move, exposing queen to capture
             const validMoves = game.getValidMoves();
             const kingMoves = validMoves.filter(move => move.piece.type === "KING");
             expect(kingMoves.length).toBeGreaterThan(0);
-            
+
             // Queen cannot move to block because it would still leave king in check
             const queenMoves = validMoves.filter(move => move.piece.type === "QUEEN");
             expect(queenMoves).toHaveLength(0);
@@ -361,7 +361,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const discoveredMove = game.makeMove({ file: 4, rank: 5 }, { file: 5, rank: 6 });
-            
+
             if (discoveredMove) {
                 expect(discoveredMove.isInCheck()).toBe(true);
             }
@@ -390,7 +390,7 @@ describe("Famous chess games and tactical patterns", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // If queen moves, king will be in check from rook (x-ray)
             const queenMove = game.makeMove({ file: 4, rank: 0 }, { file: 4, rank: 4 });
             if (queenMove) {
@@ -423,7 +423,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             // Black has moves but all lead to worse positions
             expect(validMoves.length).toBeGreaterThan(0);
             expect(game.isInCheck()).toBe(false);
@@ -510,12 +510,12 @@ describe("Famous chess games and tactical patterns", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // Kings are in opposition (facing each other with one square between)
             const validMoves = game.getValidMoves();
             const kingMoves = validMoves.filter(move => move.piece.type === "KING");
             const pawnMoves = validMoves.filter(move => move.piece.type === "PAWN");
-            
+
             expect(kingMoves.length).toBeGreaterThan(0);
             expect(pawnMoves.length).toBeGreaterThan(0);
         });
@@ -544,7 +544,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             // Black should have limited but legal moves
             expect(validMoves.length).toBeGreaterThan(0);
             expect(validMoves.length).toBeLessThan(10);
@@ -582,7 +582,7 @@ describe("Famous chess games and tactical patterns", () => {
     describe("Opening theory tests", () => {
         test("Sicilian Defense main line", () => {
             let game = Chess.newGame();
-            
+
             const sicilianMoves = [
                 ["e2", "e4"], ["c7", "c5"],
                 ["g1", "f3"], ["d7", "d6"],
@@ -590,7 +590,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["f3", "d4"], ["g8", "f6"],
                 ["b1", "c3"], ["a7", "a6"],
             ];
-            
+
             sicilianMoves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -599,14 +599,14 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             expect(game.getMoveHistory()).toHaveLength(10);
             expect(game.getCurrentPlayer()).toBe("WHITE");
         });
 
         test("Ruy Lopez opening", () => {
             let game = Chess.newGame();
-            
+
             const ruyLopezMoves = [
                 ["e2", "e4"], ["e7", "e5"],
                 ["g1", "f3"], ["b8", "c6"],
@@ -614,7 +614,7 @@ describe("Famous chess games and tactical patterns", () => {
                 ["b5", "a4"], ["g8", "f6"],
                 ["e1", "g1"], ["f8", "e7"],  // Castling
             ];
-            
+
             let moveCount = 0;
             ruyLopezMoves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
@@ -626,20 +626,20 @@ describe("Famous chess games and tactical patterns", () => {
                     moveCount++;
                 }
             });
-            
+
             expect(moveCount).toBeGreaterThan(8); // Most moves should succeed
         });
 
         test("French Defense structure", () => {
             let game = Chess.newGame();
-            
+
             const frenchMoves = [
                 ["e2", "e4"], ["e7", "e6"],
                 ["d2", "d4"], ["d7", "d5"],
                 ["b1", "c3"], ["g8", "f6"],
                 ["c1", "g5"], ["f8", "e7"],
             ];
-            
+
             frenchMoves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -648,7 +648,7 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             const board = game.getBoard();
             // Verify pawn structure
             expect(board[3]![4]?.type).toBe("PAWN"); // White e4
@@ -658,14 +658,14 @@ describe("Famous chess games and tactical patterns", () => {
 
         test("Caro-Kann Defense", () => {
             let game = Chess.newGame();
-            
+
             const caroKannMoves = [
                 ["e2", "e4"], ["c7", "c6"],
                 ["d2", "d4"], ["d7", "d5"],
                 ["b1", "c3"], ["d5", "e4"],
                 ["c3", "e4"], ["c8", "f5"],
             ];
-            
+
             caroKannMoves.forEach(([from, to]) => {
                 const fromSquare = algebraicToSquare(from!);
                 const toSquare = algebraicToSquare(to!);
@@ -674,7 +674,7 @@ describe("Famous chess games and tactical patterns", () => {
                 expect(move).not.toBeNull();
                 game = move!;
             });
-            
+
             const board = game.getBoard();
             expect(board[3]![4]?.type).toBe("KNIGHT"); // White knight on e4
             expect(board[4]![5]?.type).toBe("BISHOP"); // Black bishop on f5
@@ -709,7 +709,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const sacrifice = game.makeMove({ file: 2, rank: 3 }, { file: 7, rank: 6 });
-            
+
             if (sacrifice) {
                 expect(sacrifice.isInCheck()).toBe(true);
                 const history = sacrifice.getMoveHistory();
@@ -742,10 +742,10 @@ describe("Famous chess games and tactical patterns", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // Deflect the rook with a sacrifice
             const deflection = game.makeMove({ file: 0, rank: 7 }, { file: 6, rank: 7 });
-            
+
             if (deflection) {
                 const history = deflection.getMoveHistory();
                 expect(history[0]?.captured?.type).toBe("ROOK");
@@ -777,10 +777,10 @@ describe("Famous chess games and tactical patterns", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // Move bishop to clear the file for rook
             const clearance = game.makeMove({ file: 4, rank: 4 }, { file: 3, rank: 5 });
-            
+
             if (clearance) {
                 expect(clearance.isInCheck()).toBe(true);
             }
@@ -811,10 +811,10 @@ describe("Famous chess games and tactical patterns", () => {
             };
 
             const game = Chess.fromState(gameState);
-            
+
             // Interfere with black rook's defense
             const interference = game.makeMove({ file: 3, rank: 3 }, { file: 3, rank: 7 });
-            
+
             if (interference) {
                 // This should block the black rook's defense of the back rank
                 expect(interference.getCurrentPlayer()).toBe("BLACK");
@@ -848,7 +848,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             expect(validMoves.length).toBeGreaterThan(0);
             expect(game.getGameResult()).toBe("ONGOING");
         });
@@ -878,7 +878,7 @@ describe("Famous chess games and tactical patterns", () => {
 
             const game = Chess.fromState(gameState);
             const validMoves = game.getValidMoves();
-            
+
             expect(validMoves.length).toBeGreaterThan(0);
             expect(game.getGameResult()).toBe("ONGOING");
         });
