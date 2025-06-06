@@ -12,9 +12,7 @@ import { getPieceMoves, isValidPieceMove } from "./pieces";
 export class Chess {
     private constructor(private state: GameState) {}
 
-    /**
-     * Creates a new chess game
-     */
+
     static newGame(): Chess {
         const initialState: GameState = {
             board: createInitialBoard(),
@@ -34,44 +32,32 @@ export class Chess {
         return new Chess(initialState);
     }
 
-    /**
-     * Creates a chess game from a given state
-     */
+
     static fromState(state: GameState): Chess {
         return new Chess({ ...state });
     }
 
-    /**
-     * Gets the current game state (immutable)
-     */
+
     getState(): Readonly<GameState> {
         return { ...this.state };
     }
 
-    /**
-     * Gets the current board
-     */
+
     getBoard(): Board {
         return this.state.board.map((rank) => [...rank]);
     }
 
-    /**
-     * Gets the current player to move
-     */
+
     getCurrentPlayer(): Color {
         return this.state.currentPlayer;
     }
 
-    /**
-     * Gets the move history
-     */
+
     getMoveHistory(): Move[] {
         return [...this.state.moveHistory];
     }
 
-    /**
-     * Attempts to make a move, returns new Chess instance or null if invalid
-     */
+
     makeMove(from: Square, to: Square): Chess | null {
         const piece = getPieceAt(this.state.board, from);
 
@@ -145,16 +131,12 @@ export class Chess {
         return moves;
     }
 
-    /**
-     * Checks if the current player is in check
-     */
+
     isInCheck(): boolean {
         return this.isKingInCheck(this.state.board, this.state.currentPlayer);
     }
 
-    /**
-     * Checks if the game is over and returns the result
-     */
+
     getGameResult(): GameResult {
         const validMoves = this.getValidMoves();
 
@@ -177,25 +159,19 @@ export class Chess {
         return "ONGOING";
     }
 
-    /**
-     * Checks if the game is over
-     */
+
     isGameOver(): boolean {
         return this.getGameResult() !== "ONGOING";
     }
 
-    /**
-     * Private helper: applies a move to the board
-     */
+
     private applyMoveToBoard(board: Board, move: Move): Board {
         let newBoard = setPieceAt(board, move.from, null);
         newBoard = setPieceAt(newBoard, move.to, move.piece);
         return newBoard;
     }
 
-    /**
-     * Private helper: checks if a king is in check
-     */
+
     private isKingInCheck(board: Board, color: Color): boolean {
         const kingSquare = findKing(board, color);
         if (!kingSquare) return false;

@@ -33,3 +33,10 @@ export {
   getPieceMoves,
   isValidPieceMove,
 } from './pieces';
+
+export {
+  fileCharToIndex,
+  fileIndexToChar,
+  rankCharToIndex,
+  rankIndexToChar,
+} from './utils';

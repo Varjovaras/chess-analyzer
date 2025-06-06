@@ -3,9 +3,6 @@
 import type { Board, Piece, Square, Move, Color } from './types';
 import { isValidSquare, getPieceAt, isSquareEmpty, isSquareOccupiedBy } from './board';
 
-/**
- * Gets all possible moves for a piece at a given square
- */
 export function getPieceMoves(board: Board, square: Square): Square[] {
   const piece = getPieceAt(board, square);
   if (!piece) return [];
@@ -28,9 +25,6 @@ export function getPieceMoves(board: Board, square: Square): Square[] {
   }
 }
 
-/**
- * Pawn movement logic
- */
 function getPawnMoves(board: Board, square: Square, color: Color): Square[] {
   const moves: Square[] = [];
   const direction = color === 'WHITE' ? 1 : -1;
@@ -64,9 +58,6 @@ function getPawnMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
-/**
- * Rook movement logic (horizontal and vertical lines)
- */
 function getRookMoves(board: Board, square: Square, color: Color): Square[] {
   const moves: Square[] = [];
   const directions = [
@@ -83,9 +74,6 @@ function getRookMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
-/**
- * Knight movement logic (L-shapes)
- */
 function getKnightMoves(board: Board, square: Square, color: Color): Square[] {
   const moves: Square[] = [];
   const knightMoves = [
@@ -105,9 +93,6 @@ function getKnightMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
-/**
- * Bishop movement logic (diagonal lines)
- */
 function getBishopMoves(board: Board, square: Square, color: Color): Square[] {
   const moves: Square[] = [];
   const directions = [
@@ -124,9 +109,6 @@ function getBishopMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
-/**
- * Queen movement logic (combines rook and bishop)
- */
 function getQueenMoves(board: Board, square: Square, color: Color): Square[] {
   return [
     ...getRookMoves(board, square, color),
@@ -134,9 +116,6 @@ function getQueenMoves(board: Board, square: Square, color: Color): Square[] {
   ];
 }
 
-/**
- * King movement logic (one square in any direction)
- */
 function getKingMoves(board: Board, square: Square, color: Color): Square[] {
   const moves: Square[] = [];
   const kingMoves = [
@@ -156,10 +135,6 @@ function getKingMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
-/**
- * Helper function for sliding pieces (rook, bishop, queen)
- * Gets moves along a line until blocked or edge of board
- */
 function getLineMoves(board: Board, square: Square, direction: { file: number; rank: number }, color: Color): Square[] {
   const moves: Square[] = [];
   const current = {
@@ -186,9 +161,6 @@ function getLineMoves(board: Board, square: Square, direction: { file: number; r
   return moves;
 }
 
-/**
- * Checks if a move is a valid piece movement (doesn't check game rules like check)
- */
 export function isValidPieceMove(board: Board, from: Square, to: Square): boolean {
   const piece = getPieceAt(board, from);
   if (!piece) return false;
