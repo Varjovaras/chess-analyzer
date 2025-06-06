@@ -1,13 +1,9 @@
-// Board utilities and initial setup
-
 import type { Board, Piece, Square, Color, PieceType } from "./types";
 
 export const FILES = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 export const RANKS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
-/**
- * Creates an empty 8x8 chess board
- */
+//8x8 board
 export function createEmptyBoard(): Board {
     return Array(8)
         .fill(null)
@@ -20,8 +16,7 @@ export function createEmptyBoard(): Board {
 export function createInitialBoard(): Board {
     const board = createEmptyBoard();
 
-    // White pieces (rank 0 and 1)
-    const whiteBackRank: PieceType[] = [
+    const backRankPieces: PieceType[] = [
         "ROOK",
         "KNIGHT",
         "BISHOP",
@@ -33,7 +28,7 @@ export function createInitialBoard(): Board {
     ];
 
     for (let file = 0; file < 8; file++) {
-        const pieceType = whiteBackRank[file];
+        const pieceType = backRankPieces[file];
         if (pieceType) {
             // White back rank
             if (board[0]) board[0][file] = { type: pieceType, color: "WHITE" };
@@ -49,17 +44,11 @@ export function createInitialBoard(): Board {
     return board;
 }
 
-/**
- * Gets the piece at a given square
- */
 export function getPieceAt(board: Board, square: Square): Piece | null {
     if (!isValidSquare(square)) return null;
     return board[square.rank]?.[square.file] ?? null;
 }
 
-/**
- * Sets a piece on the board (returns new board)
- */
 export function setPieceAt(
     board: Board,
     square: Square,
@@ -75,9 +64,6 @@ export function setPieceAt(
     return newBoard;
 }
 
-/**
- * Checks if a square is within board bounds
- */
 export function isValidSquare(square: Square): boolean {
     return (
         square.file >= 0 &&
@@ -88,7 +74,7 @@ export function isValidSquare(square: Square): boolean {
 }
 
 /**
- * Converts algebraic notation (e.g., "e4") to Square
+ * Converts algebraic notation (e.g., "e4" or "E4") to Square
  */
 export function algebraicToSquare(algebraic: string): Square | null {
     if (algebraic.length !== 2) return null;
@@ -96,7 +82,11 @@ export function algebraicToSquare(algebraic: string): Square | null {
     const rankChar = algebraic[1];
     if (!rankChar) return null;
 
-    const file = algebraic.charCodeAt(0) - "a".charCodeAt(0);
+    // Convert to lowercase to handle both 'e4' and 'E4'
+    const fileChar = algebraic[0]?.toLowerCase();
+    if (!fileChar) return null;
+
+    const file = fileChar.charCodeAt(0) - "a".charCodeAt(0);
     const rank = Number.parseInt(rankChar) - 1;
 
     const square = { file, rank };
