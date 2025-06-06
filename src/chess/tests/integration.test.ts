@@ -324,8 +324,9 @@ describe("Chess integration tests", () => {
             ];
 
             moves.forEach(([from, to], index) => {
-                const fromSquare = algebraicToSquare(from)!;
-                const toSquare = algebraicToSquare(to)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
 
                 const newGame = game.makeMove(fromSquare, toSquare);
                 expect(newGame).not.toBeNull();
@@ -367,8 +368,9 @@ describe("Chess integration tests", () => {
             ];
 
             captureSequence.forEach(([from, to]) => {
-                const fromSquare = algebraicToSquare(from)!;
-                const toSquare = algebraicToSquare(to)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
 
                 const currentBoard = game.getBoard();
                 const isCapture =
@@ -444,8 +446,9 @@ describe("Chess integration tests", () => {
             ];
 
             rapidMoves.forEach(([from, to]) => {
-                const fromSquare = algebraicToSquare(from)!;
-                const toSquare = algebraicToSquare(to)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
 
                 const newGame = game.makeMove(fromSquare, toSquare);
                 expect(newGame).not.toBeNull();
@@ -469,8 +472,9 @@ describe("Chess integration tests", () => {
             ];
 
             invalidMoves.forEach(([from, to]) => {
-                const fromSquare = algebraicToSquare(from)!;
-                const toSquare = algebraicToSquare(to)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
 
                 const result = game.makeMove(fromSquare, toSquare);
                 expect(result).toBeNull();

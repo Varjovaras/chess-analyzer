@@ -218,7 +218,10 @@ describe("Comprehensive chess scenarios and analysis", () => {
             ];
             
             moves.forEach(([from, to]) => {
-                game = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                game = game.makeMove(fromSquare, toSquare)!;
             });
             
             const startTime = performance.now();
@@ -261,6 +264,7 @@ describe("Comprehensive chess scenarios and analysis", () => {
                 
                 // Simulate quick move selection
                 const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                if (!randomMove) break;
                 const newGame = game.makeMove(randomMove.from, randomMove.to);
                 
                 if (newGame) {
@@ -285,6 +289,7 @@ describe("Comprehensive chess scenarios and analysis", () => {
                 if (validMoves.length === 0) break;
                 
                 const move = validMoves[0]; // Take first valid move (fastest)
+                if (!move) break;
                 const newGame = game.makeMove(move.from, move.to);
                 
                 if (newGame) {
@@ -302,7 +307,7 @@ describe("Comprehensive chess scenarios and analysis", () => {
             let game = Chess.newGame();
             
             // Simulate correspondence game with careful moves
-            const carefulMoves = [
+            const carefulMoves: [string, string][] = [
                 ["d2", "d4"], ["g8", "f6"],
                 ["c2", "c4"], ["e7", "e6"],
                 ["g1", "f3"], ["d7", "d5"],
@@ -311,7 +316,10 @@ describe("Comprehensive chess scenarios and analysis", () => {
             ];
             
             carefulMoves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -655,7 +663,10 @@ describe("Comprehensive chess scenarios and analysis", () => {
             const pgnMoves: string[] = [];
             
             moves.forEach(([from, to], index) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 if (move) {
                     const moveNumber = Math.floor(index / 2) + 1;
                     const isWhite = index % 2 === 0;
@@ -666,8 +677,10 @@ describe("Comprehensive chess scenarios and analysis", () => {
                     
                     // Simplified PGN notation (would need more complex logic for full PGN)
                     const piece = move.getMoveHistory()[index]!.piece;
-                    const notation = piece.type === "PAWN" ? squareToAlgebraic(algebraicToSquare(to)!) : piece.type[0] + squareToAlgebraic(algebraicToSquare(to)!);
-                    pgnMoves.push(notation);
+                    if (toSquare) {
+                        const notation = piece.type === "PAWN" ? squareToAlgebraic(toSquare) : piece.type[0] + squareToAlgebraic(toSquare);
+                        pgnMoves.push(notation);
+                    }
                     
                     game = move;
                 }

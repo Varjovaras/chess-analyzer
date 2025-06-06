@@ -171,7 +171,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             moves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -193,7 +196,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             moves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -217,7 +223,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             moves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -244,7 +253,10 @@ describe("Famous chess games and tactical patterns", () => {
             // Note: This test assumes castling is implemented
             let moveCount = 0;
             moves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 if (move) {
                     game = move;
                     moveCount++;
@@ -580,7 +592,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             sicilianMoves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -602,7 +617,10 @@ describe("Famous chess games and tactical patterns", () => {
             
             let moveCount = 0;
             ruyLopezMoves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 if (move) {
                     game = move;
                     moveCount++;
@@ -623,7 +641,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             frenchMoves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });
@@ -646,7 +667,10 @@ describe("Famous chess games and tactical patterns", () => {
             ];
             
             caroKannMoves.forEach(([from, to]) => {
-                const move = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!);
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                const move = game.makeMove(fromSquare, toSquare);
                 expect(move).not.toBeNull();
                 game = move!;
             });

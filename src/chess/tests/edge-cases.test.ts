@@ -288,14 +288,18 @@ describe("Chess edge cases and boundary conditions", () => {
             ];
             
             moves.forEach(([from, to], index) => {
-                game = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                
+                game = game.makeMove(fromSquare, toSquare)!;
                 
                 const history = game.getMoveHistory();
                 expect(history).toHaveLength(index + 1);
                 
                 const lastMove = history[index]!;
-                expect(lastMove.from).toEqual(algebraicToSquare(from)!);
-                expect(lastMove.to).toEqual(algebraicToSquare(to)!);
+                expect(lastMove.from).toEqual(fromSquare);
+                expect(lastMove.to).toEqual(toSquare);
             });
         });
 

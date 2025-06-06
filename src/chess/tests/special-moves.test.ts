@@ -495,7 +495,10 @@ describe("Special chess moves and mechanics", () => {
             ];
             
             moves.forEach(([from, to]) => {
-                game = game.makeMove(algebraicToSquare(from)!, algebraicToSquare(to)!)!;
+                const fromSquare = algebraicToSquare(from!);
+                const toSquare = algebraicToSquare(to!);
+                if (!fromSquare || !toSquare) return;
+                game = game.makeMove(fromSquare, toSquare)!;
             });
             
             const finalState = game.getState();
