@@ -128,7 +128,10 @@ function getKingMoves(board: Board, square: Square, color: Color): Square[] {
   for (const move of kingMoves) {
     const target = { file: square.file + move.file, rank: square.rank + move.rank };
     if (isValidSquare(target) && !isSquareOccupiedBy(board, target, color)) {
-      moves.push(target);
+      // Check if the target square is under attack by enemy pieces
+      if (!isSquareUnderAttackBy(board, target, color === 'WHITE' ? 'BLACK' : 'WHITE')) {
+        moves.push(target);
+      }
     }
   }
 
@@ -137,6 +140,45 @@ function getKingMoves(board: Board, square: Square, color: Color): Square[] {
 
 // Note: Castling moves are handled separately in the game logic
 // since they require access to game state (castling rights, check status)
+
+export function isSquareUnderAttackBy(board: Board, square: Square, byColor: Color): boolean {
+  // Check if any piece of the given color can attack the square
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      const from = { file, rank };
+      const piece = getPieceAt(board, from);
+
+      if (piece && piece.color === byColor) {
+        // For king moves, we need to avoid infinite recursion
+        // When checking if a square is under attack, we use basic piece moves without attack checking
+        const moves = piece.type === 'KING' ? getBasicKingMoves(board, from, piece.color) : getPieceMoves(board, from);
+        if (moves.some(move => move.file === square.file && move.rank === square.rank)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function getBasicKingMoves(board: Board, square: Square, color: Color): Square[] {
+  const moves: Square[] = [];
+  const kingMoves = [
+    { file: 0, rank: 1 }, { file: 0, rank: -1 },   // up, down
+    { file: 1, rank: 0 }, { file: -1, rank: 0 },   // right, left
+    { file: 1, rank: 1 }, { file: 1, rank: -1 },   // diagonals
+    { file: -1, rank: 1 }, { file: -1, rank: -1 }
+  ];
+
+  for (const move of kingMoves) {
+    const target = { file: square.file + move.file, rank: square.rank + move.rank };
+    if (isValidSquare(target) && !isSquareOccupiedBy(board, target, color)) {
+      moves.push(target);
+    }
+  }
+
+  return moves;
+}
 
 function getLineMoves(board: Board, square: Square, direction: { file: number; rank: number }, color: Color): Square[] {
   const moves: Square[] = [];

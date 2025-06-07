@@ -10,7 +10,7 @@ import { createInitialBoard, getPieceAt, setPieceAt, findKing } from "./board";
 import { getPieceMoves, isValidPieceMove } from "./pieces";
 
 export class Chess {
-    private constructor(private state: GameState) {}
+    private constructor(private state: GameState) { }
 
 
     static newGame(): Chess {
@@ -67,7 +67,7 @@ export class Chess {
 
         // Check if this is a castling move
         const isCastlingMove = piece.type === "KING" && Math.abs(to.file - from.file) === 2;
-        
+
         if (isCastlingMove) {
             return this.makeCastlingMove(from, to);
         }
@@ -181,7 +181,23 @@ export class Chess {
 
     private applyMoveToBoard(board: Board, move: Move): Board {
         let newBoard = setPieceAt(board, move.from, null);
-        newBoard = setPieceAt(newBoard, move.to, move.piece);
+
+        // Handle pawn promotion
+        let pieceToPlace = move.piece;
+        if (move.piece.type === "PAWN") {
+            const isPromotion = (move.piece.color === "WHITE" && move.to.rank === 7) ||
+                (move.piece.color === "BLACK" && move.to.rank === 0);
+
+            if (isPromotion) {
+                // Default promotion to queen
+                pieceToPlace = {
+                    type: "QUEEN",
+                    color: move.piece.color
+                };
+            }
+        }
+
+        newBoard = setPieceAt(newBoard, move.to, pieceToPlace);
         return newBoard;
     }
 
@@ -218,7 +234,7 @@ export class Chess {
 
     private getCastlingMoves(): Move[] {
         const moves: Move[] = [];
-        
+
         // Can't castle if in check
         if (this.isInCheck()) {
             return moves;
@@ -264,14 +280,14 @@ export class Chess {
         if (!rights) return false;
 
         const rank = color === "WHITE" ? 0 : 7;
-        
+
         // Check if rook exists in starting position
         const rookSquare = { file: 7, rank };
         const rook = getPieceAt(this.state.board, rookSquare);
         if (!rook || rook.type !== "ROOK" || rook.color !== color) {
             return false;
         }
-        
+
         // Check if path is clear (f and g files)
         for (let file = 5; file <= 6; file++) {
             if (!this.isSquareEmpty({ file, rank })) {
@@ -295,14 +311,14 @@ export class Chess {
         if (!rights) return false;
 
         const rank = color === "WHITE" ? 0 : 7;
-        
+
         // Check if rook exists in starting position
         const rookSquare = { file: 0, rank };
         const rook = getPieceAt(this.state.board, rookSquare);
         if (!rook || rook.type !== "ROOK" || rook.color !== color) {
             return false;
         }
-        
+
         // Check if path is clear (b, c, d files)
         for (let file = 1; file <= 3; file++) {
             if (!this.isSquareEmpty({ file, rank })) {
@@ -428,7 +444,7 @@ export class Chess {
         // If rook moves from starting position, lose castling rights for that side
         if (move.piece.type === "ROOK") {
             const { from, piece } = move;
-            
+
             if (piece.color === "WHITE" && from.rank === 0) {
                 if (from.file === 0) newRights.whiteQueenside = false;
                 if (from.file === 7) newRights.whiteKingside = false;
@@ -441,7 +457,7 @@ export class Chess {
         // If rook is captured, lose castling rights for that side
         if (move.captured?.type === "ROOK") {
             const { to, captured } = move;
-            
+
             if (captured.color === "WHITE" && to.rank === 0) {
                 if (to.file === 0) newRights.whiteQueenside = false;
                 if (to.file === 7) newRights.whiteKingside = false;
@@ -452,5 +468,56 @@ export class Chess {
         }
 
         return newRights;
+    }
+
+    private isPiecePinned(from: Square): boolean {
+        const piece = getPieceAt(this.state.board, from);
+        if (!piece || piece.type === "KING") return false;
+
+        const kingSquare = findKing(this.state.board, piece.color);
+        if (!kingSquare) return false;
+
+        // Check if the piece is on the same line as the king (rank, file, or diagonal)
+        const sameRank = kingSquare.rank === from.rank;
+        const sameFile = kingSquare.file === from.file;
+        const sameDiagonal = Math.abs(kingSquare.rank - from.rank) === Math.abs(kingSquare.file - from.file);
+
+        if (!sameRank && !sameFile && !sameDiagonal) {
+            return false; // Not on the same line, cannot be pinned
+        }
+
+        // Determine the direction from king to the piece
+        const rankDirection = from.rank === kingSquare.rank ? 0 : (from.rank > kingSquare.rank ? 1 : -1);
+        const fileDirection = from.file === kingSquare.file ? 0 : (from.file > kingSquare.file ? 1 : -1);
+
+        // Check if there's an enemy piece beyond the piece being checked that could attack the king
+        let currentSquare = {
+            file: from.file + fileDirection,
+            rank: from.rank + rankDirection
+        };
+
+        while (currentSquare.file >= 0 && currentSquare.file < 8 &&
+            currentSquare.rank >= 0 && currentSquare.rank < 8) {
+
+            const pieceAtSquare = getPieceAt(this.state.board, currentSquare);
+
+            if (pieceAtSquare) {
+                // Found a piece - check if it's an enemy piece that can attack along this line
+                if (pieceAtSquare.color !== piece.color) {
+                    // Check if this enemy piece can attack along the line towards the king
+                    const canAttackAlongLine =
+                        (sameRank || sameFile) && (pieceAtSquare.type === "ROOK" || pieceAtSquare.type === "QUEEN") ||
+                        sameDiagonal && (pieceAtSquare.type === "BISHOP" || pieceAtSquare.type === "QUEEN");
+
+                    return canAttackAlongLine;
+                }
+                break; // Found a friendly piece, no pin possible
+            }
+
+            currentSquare.file += fileDirection;
+            currentSquare.rank += rankDirection;
+        }
+
+        return false;
     }
 }
