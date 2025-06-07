@@ -11,8 +11,10 @@ describe("Advanced chess scenarios", () => {
             // Clear pieces between king and rook
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!; // Knight
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
-            game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!; // Bishop
+            game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e3")!)!; // Pawn to clear bishop path
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!; // Bishop
+            game = game.makeMove(algebraicToSquare("c7")!, algebraicToSquare("c6")!)!; // Black pawn
 
             // Try to castle (this test assumes castling is implemented)
             const validMoves = game.getValidMoves();
@@ -32,10 +34,12 @@ describe("Advanced chess scenarios", () => {
             // Clear pieces between king and queenside rook
             game = game.makeMove(algebraicToSquare("b1")!, algebraicToSquare("c3")!)!; // Knight
             game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
-            game = game.makeMove(algebraicToSquare("c1")!, algebraicToSquare("d2")!)!; // Bishop
+            game = game.makeMove(algebraicToSquare("d2")!, algebraicToSquare("d3")!)!; // Pawn to clear bishop path
             game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
-            game = game.makeMove(algebraicToSquare("d1")!, algebraicToSquare("c2")!)!; // Queen
+            game = game.makeMove(algebraicToSquare("c1")!, algebraicToSquare("f4")!)!; // Bishop to f4 instead of d2
             game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("d1")!, algebraicToSquare("d2")!)!; // Queen to d2 (now empty)
+            game = game.makeMove(algebraicToSquare("c7")!, algebraicToSquare("c6")!)!; // Black pawn
 
             const validMoves = game.getValidMoves();
             const castlingMoves = validMoves.filter(move =>
@@ -50,17 +54,19 @@ describe("Advanced chess scenarios", () => {
         test("cannot castle when king has moved", () => {
             let game = Chess.newGame();
 
-            // Move king and then back
-            game = game.makeMove(algebraicToSquare("e1")!, algebraicToSquare("e2")!)!;
-            game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!;
-            game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e1")!)!;
-            game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!;
+            // Move king and then back (first move pawn to clear path)
+            game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e3")!)!; // Clear path
+            game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("e1")!, algebraicToSquare("e2")!)!; // King forward
+            game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e1")!)!; // King back
+            game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!; // Black pawn
 
             // Clear pieces for castling
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
-            game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!;
+            game = game.makeMove(algebraicToSquare("c7")!, algebraicToSquare("c6")!)!;
             game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!;
-            game = game.makeMove(algebraicToSquare("g7")!, algebraicToSquare("g6")!)!;
+            game = game.makeMove(algebraicToSquare("g7")!, algebraicToSquare("g6")!)!;;
 
             const validMoves = game.getValidMoves();
             const castlingMoves = validMoves.filter(move =>
@@ -74,17 +80,21 @@ describe("Advanced chess scenarios", () => {
         test("cannot castle when rook has moved", () => {
             let game = Chess.newGame();
 
-            // Move kingside rook and back
-            game = game.makeMove(algebraicToSquare("h1")!, algebraicToSquare("h2")!)!;
-            game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!;
-            game = game.makeMove(algebraicToSquare("h2")!, algebraicToSquare("h1")!)!;
-            game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!;
+            // Move kingside rook and back (first move pawn to clear path)
+            game = game.makeMove(algebraicToSquare("h2")!, algebraicToSquare("h3")!)!; // Clear path
+            game = game.makeMove(algebraicToSquare("e7")!, algebraicToSquare("e6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("h1")!, algebraicToSquare("h2")!)!; // Rook forward
+            game = game.makeMove(algebraicToSquare("d7")!, algebraicToSquare("d6")!)!; // Black pawn
+            game = game.makeMove(algebraicToSquare("h2")!, algebraicToSquare("h1")!)!; // Rook back
+            game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!; // Black pawn
 
             // Clear pieces for castling
             game = game.makeMove(algebraicToSquare("g1")!, algebraicToSquare("f3")!)!;
-            game = game.makeMove(algebraicToSquare("f7")!, algebraicToSquare("f6")!)!;
-            game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!;
             game = game.makeMove(algebraicToSquare("g7")!, algebraicToSquare("g6")!)!;
+            game = game.makeMove(algebraicToSquare("e2")!, algebraicToSquare("e3")!)!; // Clear bishop path
+            game = game.makeMove(algebraicToSquare("c7")!, algebraicToSquare("c6")!)!;
+            game = game.makeMove(algebraicToSquare("f1")!, algebraicToSquare("e2")!)!;
+            game = game.makeMove(algebraicToSquare("b7")!, algebraicToSquare("b6")!)!;;
 
             const validMoves = game.getValidMoves();
             const castlingMoves = validMoves.filter(move =>

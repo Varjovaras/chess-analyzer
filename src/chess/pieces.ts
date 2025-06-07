@@ -135,6 +135,9 @@ function getKingMoves(board: Board, square: Square, color: Color): Square[] {
   return moves;
 }
 
+// Note: Castling moves are handled separately in the game logic
+// since they require access to game state (castling rights, check status)
+
 function getLineMoves(board: Board, square: Square, direction: { file: number; rank: number }, color: Color): Square[] {
   const moves: Square[] = [];
   const current = {
@@ -164,6 +167,12 @@ function getLineMoves(board: Board, square: Square, direction: { file: number; r
 export function isValidPieceMove(board: Board, from: Square, to: Square): boolean {
   const piece = getPieceAt(board, from);
   if (!piece) return false;
+
+  // Handle castling moves separately (king moving 2 squares horizontally)
+  if (piece.type === "KING" && Math.abs(to.file - from.file) === 2 && to.rank === from.rank) {
+    // Castling moves are validated in the game logic, not here
+    return true;
+  }
 
   const possibleMoves = getPieceMoves(board, from);
   return possibleMoves.some(move => move.file === to.file && move.rank === to.rank);

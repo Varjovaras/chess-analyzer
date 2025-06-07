@@ -154,8 +154,7 @@ describe("Chess game logic", () => {
         test("detects check correctly", () => {
             let game = Chess.newGame();
 
-            // Create a position where white king is in check
-            // This is a simplified scenario - in a real game this would require multiple moves
+            // Create a position where black king is in check (Scholar's Mate setup)
             game = game.makeMove(
                 algebraicToSquare("e2")!,
                 algebraicToSquare("e4")!,
@@ -169,7 +168,7 @@ describe("Chess game logic", () => {
                 algebraicToSquare("h5")!,
             )!; // Queen to h5
 
-            expect(game.isInCheck()).toBe(false); // White is not in check
+            expect(game.isInCheck()).toBe(true); // Black king is in check
             expect(game.getCurrentPlayer()).toBe("BLACK");
 
             // Black king should be in check from white queen on h5
