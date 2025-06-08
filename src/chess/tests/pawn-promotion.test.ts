@@ -249,12 +249,12 @@ describe('Pawn Promotion', () => {
     });
 
     test('promotion resolves check', () => {
-      // Test where promoting to queen can block or capture to resolve check
+      // Test where promoting to queen blocks check from distant attacker
       const board = createEmptyBoard();
-      let testBoard = setPieceAt(board, { file: 4, rank: 6 }, { type: 'PAWN', color: 'WHITE' });
-      testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'KING', color: 'WHITE' });
-      testBoard = setPieceAt(testBoard, { file: 4, rank: 7 }, { type: 'ROOK', color: 'BLACK' }); // Attacks white king
-      testBoard = setPieceAt(testBoard, { file: 7, rank: 7 }, { type: 'KING', color: 'BLACK' });
+      let testBoard = setPieceAt(board, { file: 4, rank: 6 }, { type: 'PAWN', color: 'WHITE' }); // e7
+      testBoard = setPieceAt(testBoard, { file: 4, rank: 0 }, { type: 'KING', color: 'WHITE' }); // e1
+      testBoard = setPieceAt(testBoard, { file: 4, rank: 4 }, { type: 'ROOK', color: 'BLACK' }); // e5 - attacks king on e1
+      testBoard = setPieceAt(testBoard, { file: 7, rank: 7 }, { type: 'KING', color: 'BLACK' }); // h8
 
       const game = Chess.fromState({
         board: testBoard,
@@ -273,7 +273,7 @@ describe('Pawn Promotion', () => {
 
       expect(game.isInCheck()).toBe(true);
       
-      // Promote and capture the attacking rook
+      // Promote to block the check
       const result = game.makeMove({ file: 4, rank: 6 }, { file: 4, rank: 7 });
       
       if (result) {

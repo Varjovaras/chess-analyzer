@@ -241,13 +241,13 @@ describe('Check and Checkmate', () => {
 
   describe('Checkmate', () => {
     test('detects simple checkmate', () => {
-      // Back rank mate
+      // Back rank mate - rook attacks horizontally along back rank
       const board = createEmptyBoard();
       let testBoard = setPieceAt(board, { file: 6, rank: 0 }, { type: 'KING', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 5, rank: 1 }, { type: 'PAWN', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 6, rank: 1 }, { type: 'PAWN', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 7, rank: 1 }, { type: 'PAWN', color: 'WHITE' });
-      testBoard = setPieceAt(testBoard, { file: 6, rank: 7 }, { type: 'ROOK', color: 'BLACK' });
+      testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'ROOK', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 0, rank: 7 }, { type: 'KING', color: 'BLACK' });
 
       const game = Chess.fromState({
