@@ -43,12 +43,12 @@ describe('Game Flow Integration', () => {
       let game = Chess.newGame();
       
       // Prepare for kingside castling
-      game = game.makeMove(algebraicToSquare('e2')!, algebraicToSquare('e4')!)!;
-      game = game.makeMove(algebraicToSquare('e7')!, algebraicToSquare('e5')!)!;
-      game = game.makeMove(algebraicToSquare('g1')!, algebraicToSquare('f3')!)!;
-      game = game.makeMove(algebraicToSquare('b8')!, algebraicToSquare('c6')!)!;
-      game = game.makeMove(algebraicToSquare('f1')!, algebraicToSquare('c4')!)!;
-      game = game.makeMove(algebraicToSquare('f8')!, algebraicToSquare('c5')!)!;
+      game = game.makeMove(algebraicToSquare('e2')!, algebraicToSquare('e3')!)!; // Clear bishop's path
+      game = game.makeMove(algebraicToSquare('e7')!, algebraicToSquare('e6')!)!; // Clear black bishop's path
+      game = game.makeMove(algebraicToSquare('g1')!, algebraicToSquare('f3')!)!; // Knight out
+      game = game.makeMove(algebraicToSquare('g8')!, algebraicToSquare('f6')!)!; // Black knight out
+      game = game.makeMove(algebraicToSquare('f1')!, algebraicToSquare('d3')!)!; // Bishop out
+      game = game.makeMove(algebraicToSquare('f8')!, algebraicToSquare('d6')!)!; // Black bishop out
       
       // Both sides can now castle kingside
       game = game.makeMove(algebraicToSquare('e1')!, algebraicToSquare('g1')!)!;
@@ -96,6 +96,10 @@ describe('Game Flow Integration', () => {
       expect(initialState.castlingRights.whiteQueenside).toBe(true);
       expect(initialState.castlingRights.blackKingside).toBe(true);
       expect(initialState.castlingRights.blackQueenside).toBe(true);
+      
+      // Clear path for king movement first
+      game = game.makeMove(algebraicToSquare('e2')!, algebraicToSquare('e3')!)!; // Pawn e2-e3
+      game = game.makeMove(algebraicToSquare('e7')!, algebraicToSquare('e6')!)!; // Black pawn
       
       // Move white king
       game = game.makeMove(algebraicToSquare('e1')!, algebraicToSquare('e2')!)!;
