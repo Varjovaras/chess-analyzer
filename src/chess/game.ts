@@ -170,6 +170,11 @@ export class Chess {
             return "DRAW";
         }
 
+        // Check for insufficient material
+        if (this.isInsufficientMaterial()) {
+            return "DRAW";
+        }
+
         return "ONGOING";
     }
 
@@ -491,7 +496,7 @@ export class Chess {
         const fileDirection = from.file === kingSquare.file ? 0 : (from.file > kingSquare.file ? 1 : -1);
 
         // Check if there's an enemy piece beyond the piece being checked that could attack the king
-        let currentSquare = {
+        const currentSquare = {
             file: from.file + fileDirection,
             rank: from.rank + rankDirection
         };
@@ -516,6 +521,85 @@ export class Chess {
 
             currentSquare.file += fileDirection;
             currentSquare.rank += rankDirection;
+        }
+
+        return false;
+    }
+
+    private isInsufficientMaterial(): boolean {
+        const whitePieces: { [key: string]: number } = {};
+        const blackPieces: { [key: string]: number } = {};
+
+        // Count all pieces
+        for (let rank = 0; rank < 8; rank++) {
+            for (let file = 0; file < 8; file++) {
+                const piece = getPieceAt(this.state.board, { file, rank });
+                if (piece) {
+                    if (piece.color === "WHITE") {
+                        whitePieces[piece.type] = (whitePieces[piece.type] || 0) + 1;
+                    } else {
+                        blackPieces[piece.type] = (blackPieces[piece.type] || 0) + 1;
+                    }
+                }
+            }
+        }
+
+        // Helper to check if a side has only king
+        const hasOnlyKing = (pieces: { [key: string]: number }) => {
+            return pieces.KING === 1 && Object.keys(pieces).length === 1;
+        };
+
+        // Helper to check if a side has king + bishop or king + knight only
+        const hasKingAndMinorPiece = (pieces: { [key: string]: number }) => {
+            return pieces.KING === 1 && 
+                   ((pieces.BISHOP === 1 && Object.keys(pieces).length === 2) ||
+                    (pieces.KNIGHT === 1 && Object.keys(pieces).length === 2));
+        };
+
+        // Helper to check if a side has king + bishops on same color squares
+        const hasKingAndSameColorBishops = (pieces: { [key: string]: number }) => {
+            if (pieces.KING !== 1 || !pieces.BISHOP || Object.keys(pieces).length !== 2) {
+                return false;
+            }
+
+            // Get all bishops for this color
+            const bishops: Square[] = [];
+            for (let rank = 0; rank < 8; rank++) {
+                for (let file = 0; file < 8; file++) {
+                    const piece = getPieceAt(this.state.board, { file, rank });
+                    if (piece && piece.type === "BISHOP") {
+                        const isWhite = whitePieces.BISHOP && whitePieces.KING;
+                        if ((isWhite && piece.color === "WHITE") || (!isWhite && piece.color === "BLACK")) {
+                            bishops.push({ file, rank });
+                        }
+                    }
+                }
+            }
+
+            // Check if all bishops are on the same color squares
+            if (bishops.length <= 1) return true;
+            
+            const firstBishop = bishops[0];
+            if (!firstBishop) return true;
+            
+            const firstSquareColor = (firstBishop.file + firstBishop.rank) % 2;
+            return bishops.every(square => (square.file + square.rank) % 2 === firstSquareColor);
+        };
+
+        // King vs King
+        if (hasOnlyKing(whitePieces) && hasOnlyKing(blackPieces)) {
+            return true;
+        }
+
+        // King vs King + Bishop or King + Knight
+        if ((hasOnlyKing(whitePieces) && hasKingAndMinorPiece(blackPieces)) ||
+            (hasOnlyKing(blackPieces) && hasKingAndMinorPiece(whitePieces))) {
+            return true;
+        }
+
+        // King + Bishop vs King + Bishop (same color squares)
+        if (hasKingAndSameColorBishops(whitePieces) && hasKingAndSameColorBishops(blackPieces)) {
+            return true;
         }
 
         return false;

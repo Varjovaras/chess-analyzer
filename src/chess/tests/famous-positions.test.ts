@@ -53,7 +53,7 @@ describe('Famous Chess Positions and Games', () => {
       const board = createEmptyBoard();
       let testBoard = setPieceAt(board, { file: 4, rank: 0 }, { type: 'KING', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 2, rank: 0 }, { type: 'KING', color: 'BLACK' });
-      testBoard = setPieceAt(testBoard, { file: 5, rank: 4 }, { type: 'BISHOP', color: 'WHITE' });
+      testBoard = setPieceAt(testBoard, { file: 2, rank: 4 }, { type: 'BISHOP', color: 'WHITE' }); // Corrected Bishop start from f5 to c5 for Be7
       testBoard = setPieceAt(testBoard, { file: 3, rank: 4 }, { type: 'KNIGHT', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 4, rank: 3 }, { type: 'PAWN', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 5, rank: 2 }, { type: 'PAWN', color: 'WHITE' });
@@ -77,7 +77,7 @@ describe('Famous Chess Positions and Games', () => {
       });
 
       // 18. Be7!! - the brilliant sacrifice move
-      const result = game.makeMove({ file: 5, rank: 4 }, { file: 4, rank: 6 });
+      const result = game.makeMove({ file: 2, rank: 4 }, { file: 4, rank: 6 }); // Corrected Bishop move from c5 (was f5) to e7
       expect(result).not.toBeNull();
       
       // This sets up a beautiful mating attack
@@ -179,8 +179,8 @@ describe('Famous Chess Positions and Games', () => {
       const board = createEmptyBoard();
       let testBoard = setPieceAt(board, { file: 4, rank: 0 }, { type: 'KING', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'QUEEN', color: 'BLACK' });
-      testBoard = setPieceAt(testBoard, { file: 2, rank: 1 }, { type: 'KNIGHT', color: 'WHITE' });
-      testBoard = setPieceAt(testBoard, { file: 7, rank: 7 }, { type: 'KING', color: 'WHITE' });
+      testBoard = setPieceAt(testBoard, { file: 3, rank: 3 }, { type: 'KNIGHT', color: 'WHITE' }); // White Knight to d4
+      testBoard = setPieceAt(testBoard, { file: 7, rank: 1 }, { type: 'KING', color: 'WHITE' }); // White King to h2 (safe)
 
       const game = Chess.fromState({
         board: testBoard,
@@ -198,7 +198,7 @@ describe('Famous Chess Positions and Games', () => {
       });
 
       // Knight can fork king and queen
-      const forkMove = game.makeMove({ file: 2, rank: 1 }, { file: 1, rank: 3 });
+      const forkMove = game.makeMove({ file: 3, rank: 3 }, { file: 2, rank: 1 }); // Knight d4-c2, forking Ke1 and Qa1
       expect(forkMove).not.toBeNull();
       
       if (forkMove) {
@@ -268,7 +268,7 @@ describe('Famous Chess Positions and Games', () => {
     test('Skewer - attacking valuable piece behind less valuable one', () => {
       const board = createEmptyBoard();
       let testBoard = setPieceAt(board, { file: 0, rank: 0 }, { type: 'KING', color: 'BLACK' });
-      testBoard = setPieceAt(testBoard, { file: 1, rank: 0 }, { type: 'QUEEN', color: 'BLACK' });
+      testBoard = setPieceAt(testBoard, { file: 1, rank: 1 }, { type: 'QUEEN', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 7, rank: 0 }, { type: 'ROOK', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 7, rank: 7 }, { type: 'KING', color: 'WHITE' });
 
@@ -287,7 +287,7 @@ describe('Famous Chess Positions and Games', () => {
         fullmoveNumber: 1,
       });
 
-      // King must move, exposing the queen to capture
+      // King is in check from the rook and must move, exposing the queen to capture
       expect(game.isInCheck()).toBe(true);
       
       const kingMoves = game.getValidMoves().filter(move => 
