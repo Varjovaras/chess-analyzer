@@ -22,6 +22,16 @@ export default async function Home() {
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
 						<Link
 							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
+							href="/chess"
+						>
+							<h3 className="font-bold text-2xl">Play Chess →</h3>
+							<div className="text-lg">
+								Play a game of chess with your custom implementation. Full board
+								with piece movement, check, and checkmate detection.
+							</div>
+						</Link>
+						<Link
+							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
 							href="https://create.t3.gg/en/usage/first-steps"
 							target="_blank"
 						>
