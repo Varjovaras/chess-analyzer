@@ -106,7 +106,7 @@ export class Chess {
                 this.state.currentPlayer === "BLACK"
                     ? this.state.fullmoveNumber + 1
                     : this.state.fullmoveNumber,
-            enPassantTarget: null, // TODO: Handle en passant
+            enPassantTarget: null,
         };
 
         return new Chess(newState);
@@ -551,8 +551,8 @@ export class Chess {
 
         // Helper to check if a side has king + bishop or king + knight only
         const hasKingAndMinorPiece = (pieces: { [key: string]: number }) => {
-            return pieces.KING === 1 && 
-                   ((pieces.BISHOP === 1 && Object.keys(pieces).length === 2) ||
+            return pieces.KING === 1 &&
+                ((pieces.BISHOP === 1 && Object.keys(pieces).length === 2) ||
                     (pieces.KNIGHT === 1 && Object.keys(pieces).length === 2));
         };
 
@@ -578,10 +578,10 @@ export class Chess {
 
             // Check if all bishops are on the same color squares
             if (bishops.length <= 1) return true;
-            
+
             const firstBishop = bishops[0];
             if (!firstBishop) return true;
-            
+
             const firstSquareColor = (firstBishop.file + firstBishop.rank) % 2;
             return bishops.every(square => (square.file + square.rank) % 2 === firstSquareColor);
         };

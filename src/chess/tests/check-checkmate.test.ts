@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { Chess, createEmptyBoard, setPieceAt, algebraicToSquare } from '../index';
+import { Chess, createEmptyBoard, setPieceAt } from '../index';
 
 describe('Check and Checkmate', () => {
   describe('Check Detection', () => {
@@ -171,7 +171,7 @@ describe('Check and Checkmate', () => {
       });
 
       expect(game.isInCheck()).toBe(true);
-      
+
       // King moves to escape check
       const result = game.makeMove({ file: 4, rank: 0 }, { file: 5, rank: 0 });
       expect(result).not.toBeNull();
@@ -201,7 +201,7 @@ describe('Check and Checkmate', () => {
       });
 
       expect(game.isInCheck()).toBe(true);
-      
+
       // Queen captures attacking rook
       const result = game.makeMove({ file: 5, rank: 1 }, { file: 4, rank: 2 });
       expect(result).not.toBeNull();
@@ -231,7 +231,7 @@ describe('Check and Checkmate', () => {
       });
 
       expect(game.isInCheck()).toBe(true);
-      
+
       // Bishop blocks the check
       const result = game.makeMove({ file: 0, rank: 0 }, { file: 4, rank: 4 });
       expect(result).not.toBeNull();
@@ -373,7 +373,7 @@ describe('Check and Checkmate', () => {
       });
 
       expect(game.isInCheck()).toBe(true);
-      
+
       // Cannot move rook to unrelated square while in check
       const result = game.makeMove({ file: 0, rank: 0 }, { file: 1, rank: 0 });
       expect(result).toBeNull();

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { Chess, createEmptyBoard, setPieceAt, algebraicToSquare } from '../index';
+import { Chess, createEmptyBoard, setPieceAt } from '../index';
 
 describe('Famous Checkmate Patterns', () => {
   describe('Basic Checkmate Patterns', () => {
@@ -150,7 +150,7 @@ describe('Famous Checkmate Patterns', () => {
       // Knight delivers smothered mate
       const smotheredMate = game.makeMove({ file: 5, rank: 5 }, { file: 7, rank: 4 });
       expect(smotheredMate).not.toBeNull();
-      
+
       if (smotheredMate) {
         // This demonstrates a smothered mate pattern (king surrounded by own pieces)
         // The exact check depends on the knight's attacking squares
@@ -421,7 +421,7 @@ describe('Famous Checkmate Patterns', () => {
 
       // Queen sacrifice leads to mate concept
       const sacrifice = game.makeMove({ file: 3, rank: 4 }, { file: 6, rank: 7 });
-      
+
       // This move may not be legal in the current position
       if (sacrifice) {
         // If the sacrifice is legal, continue the sequence
@@ -447,7 +447,7 @@ describe('Famous Checkmate Patterns', () => {
       testBoard = setPieceAt(testBoard, { file: 5, rank: 6 }, { type: 'PAWN', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 6, rank: 6 }, { type: 'PAWN', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 7, rank: 6 }, { type: 'PAWN', color: 'BLACK' });
-      
+
       testBoard = setPieceAt(testBoard, { file: 4, rank: 0 }, { type: 'KING', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'ROOK', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 7, rank: 0 }, { type: 'ROOK', color: 'WHITE' });
@@ -471,7 +471,7 @@ describe('Famous Checkmate Patterns', () => {
 
       // The famous 16. Nxd7! sacrifice
       const sacrifice = game.makeMove({ file: 4, rank: 5 }, { file: 3, rank: 7 });
-      
+
       // This move may not be legal in the current position setup
       if (sacrifice) {
         // This sets up a forced mate
@@ -489,7 +489,7 @@ describe('Famous Checkmate Patterns', () => {
       testBoard = setPieceAt(testBoard, { file: 4, rank: 6 }, { type: 'PAWN', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 5, rank: 6 }, { type: 'PAWN', color: 'BLACK' });
       testBoard = setPieceAt(testBoard, { file: 5, rank: 4 }, { type: 'KNIGHT', color: 'BLACK' });
-      
+
       testBoard = setPieceAt(testBoard, { file: 4, rank: 0 }, { type: 'KING', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 3, rank: 0 }, { type: 'QUEEN', color: 'WHITE' });
       testBoard = setPieceAt(testBoard, { file: 2, rank: 4 }, { type: 'BISHOP', color: 'WHITE' });
@@ -512,15 +512,15 @@ describe('Famous Checkmate Patterns', () => {
 
       // Queen sacrifice for mate concept
       const sacrifice = game.makeMove({ file: 3, rank: 0 }, { file: 5, rank: 4 });
-      
+
       // This move may not be legal in the current position setup
       if (sacrifice) {
         // After Nxq, Nd4+ and mate follows
         const capture = sacrifice.makeMove({ file: 5, rank: 4 }, { file: 3, rank: 0 });
-        
+
         if (capture) {
           const check = capture.makeMove({ file: 5, rank: 2 }, { file: 3, rank: 3 });
-          
+
           if (check) {
             expect(check.isInCheck()).toBe(true);
           }
