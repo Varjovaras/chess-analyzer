@@ -16,21 +16,21 @@ export function isInsufficientMaterial(board: Board): boolean {
 
     // Helper to check if a side has only king
     const hasOnlyKing = (pieces: MaterialCount) => {
-        return pieces.KING === 1 && 
-               pieces.QUEEN === 0 && 
-               pieces.ROOK === 0 && 
-               pieces.BISHOP === 0 && 
-               pieces.KNIGHT === 0 && 
-               pieces.PAWN === 0;
+        return pieces.KING === 1 &&
+            pieces.QUEEN === 0 &&
+            pieces.ROOK === 0 &&
+            pieces.BISHOP === 0 &&
+            pieces.KNIGHT === 0 &&
+            pieces.PAWN === 0;
     };
 
     // Helper to check if a side has king + bishop or king + knight only
     const hasKingAndMinorPiece = (pieces: MaterialCount) => {
         return pieces.KING === 1 &&
-               pieces.QUEEN === 0 &&
-               pieces.ROOK === 0 &&
-               pieces.PAWN === 0 &&
-               ((pieces.BISHOP === 1 && pieces.KNIGHT === 0) ||
+            pieces.QUEEN === 0 &&
+            pieces.ROOK === 0 &&
+            pieces.PAWN === 0 &&
+            ((pieces.BISHOP === 1 && pieces.KNIGHT === 0) ||
                 (pieces.KNIGHT === 1 && pieces.BISHOP === 0));
     };
 
@@ -46,17 +46,17 @@ export function isInsufficientMaterial(board: Board): boolean {
     }
 
     // King + Bishop vs King + Bishop (bishops on same color squares)
-    if (whitePieces.KING === 1 && whitePieces.BISHOP === 1 && 
-        whitePieces.QUEEN === 0 && whitePieces.ROOK === 0 && 
+    if (whitePieces.KING === 1 && whitePieces.BISHOP === 1 &&
+        whitePieces.QUEEN === 0 && whitePieces.ROOK === 0 &&
         whitePieces.KNIGHT === 0 && whitePieces.PAWN === 0 &&
-        blackPieces.KING === 1 && blackPieces.BISHOP === 1 && 
-        blackPieces.QUEEN === 0 && blackPieces.ROOK === 0 && 
+        blackPieces.KING === 1 && blackPieces.BISHOP === 1 &&
+        blackPieces.QUEEN === 0 && blackPieces.ROOK === 0 &&
         blackPieces.KNIGHT === 0 && blackPieces.PAWN === 0) {
-        
+
         // Get bishops of each color
         let whiteBishopSquareColor: number | null = null;
         let blackBishopSquareColor: number | null = null;
-        
+
         for (let rank = 0; rank < 8; rank++) {
             for (let file = 0; file < 8; file++) {
                 const piece = getPieceAt(board, { file, rank });
@@ -72,7 +72,7 @@ export function isInsufficientMaterial(board: Board): boolean {
         }
 
         // If both bishops are on the same color squares, it's a draw
-        if (whiteBishopSquareColor !== null && blackBishopSquareColor !== null && 
+        if (whiteBishopSquareColor !== null && blackBishopSquareColor !== null &&
             whiteBishopSquareColor === blackBishopSquareColor) {
             return true;
         }
@@ -95,7 +95,9 @@ export function countMaterial(board: Board, color: Color): MaterialCount {
         for (let file = 0; file < 8; file++) {
             const piece = getPieceAt(board, { file, rank });
             if (piece && piece.color === color) {
-                count[piece.type]++;
+                if (piece.type in count) {
+                    count[piece.type as keyof MaterialCount]++;
+                }
             }
         }
     }
@@ -104,12 +106,12 @@ export function countMaterial(board: Board, color: Color): MaterialCount {
 }
 
 function hasKingAndSameColorBishops(board: Board, pieces: MaterialCount): boolean {
-    if (pieces.KING !== 1 || pieces.BISHOP === 0 || 
+    if (pieces.KING !== 1 || pieces.BISHOP === 0 ||
         pieces.QUEEN > 0 || pieces.ROOK > 0 || pieces.KNIGHT > 0 || pieces.PAWN > 0) {
         return false;
     }
 
-    return true; // Simplified for now - any position with only king and bishops is insufficient material
+    return true;
 }
 
 export function isFiftyMoveRule(halfmoveClock: number): boolean {
@@ -126,7 +128,7 @@ export function isThreefoldRepetition(gameState: GameState): boolean {
 export function isStalemate(
     board: Board,
     color: Color,
-    validMoves: any[],
+    validMoves: unknown[],
     isInCheck: boolean
 ): boolean {
     // Stalemate occurs when:
@@ -135,7 +137,7 @@ export function isStalemate(
     return !isInCheck && validMoves.length === 0;
 }
 
-export function evaluateDrawConditions(gameState: GameState, validMoves: any[], isInCheck: boolean): boolean {
+export function evaluateDrawConditions(gameState: GameState, validMoves: unknown[], isInCheck: boolean): boolean {
     // Check insufficient material
     if (isInsufficientMaterial(gameState.board)) {
         return true;
@@ -174,7 +176,10 @@ export function getTotalMaterialValue(board: Board, color: Color): number {
         for (let file = 0; file < 8; file++) {
             const piece = getPieceAt(board, { file, rank });
             if (piece && piece.color === color) {
-                totalValue += pieceValues[piece.type];
+                if (piece.type in pieceValues) {
+                    totalValue += pieceValues[piece.type as keyof MaterialCount];
+
+                }
             }
         }
     }
@@ -184,24 +189,24 @@ export function getTotalMaterialValue(board: Board, color: Color): number {
 
 export function hasMinimumMatingMaterial(board: Board, color: Color): boolean {
     const material = countMaterial(board, color);
-    
+
     // Queen can mate
     if (material.QUEEN > 0) return true;
-    
+
     // Rook can mate
     if (material.ROOK > 0) return true;
-    
+
     // Pawn can mate (can promote)
     if (material.PAWN > 0) return true;
-    
+
     // Two bishops can mate
     if (material.BISHOP >= 2) return true;
-    
+
     // Bishop and knight can mate
     if (material.BISHOP >= 1 && material.KNIGHT >= 1) return true;
-    
+
     // Three knights can mate (rare but possible)
     if (material.KNIGHT >= 3) return true;
-    
+
     return false;
 }

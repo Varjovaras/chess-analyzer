@@ -1,4 +1,4 @@
-import type { Board, Square, Color, Move, GameState } from "../types";
+import type { Board, Square, Color, Move, GameState } from "..";
 import { getPieceAt, setPieceAt } from "../board";
 import { isValidPieceMove } from "../pieces";
 import { isKingInCheck } from "../rules/check-detection";
@@ -74,7 +74,7 @@ export function simulateMove(board: Board, from: Square, to: Square): Board {
     if (!piece) return board;
 
     let newBoard = setPieceAt(board, from, null);
-    
+
     // Handle pawn promotion (default to queen)
     let pieceToPlace = piece;
     if (piece.type === "PAWN") {

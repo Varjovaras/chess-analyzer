@@ -1,4 +1,4 @@
-import type { Board, Square, Color } from "../types";
+import type { Board, Square, Color } from "..";
 import { isValidSquare, isSquareEmpty, isSquareOccupiedBy } from "../board";
 
 export function getRookMoves(board: Board, square: Square, color: Color): Square[] {
@@ -25,7 +25,7 @@ export function isRookAttackingSquare(
     // Check if target is on same rank or file
     const sameRank = rookSquare.rank === targetSquare.rank;
     const sameFile = rookSquare.file === targetSquare.file;
-    
+
     if (!sameRank && !sameFile) {
         return false;
     }
@@ -43,17 +43,17 @@ export function isRookAttackingSquare(
             file: rookSquare.file + dir.file,
             rank: rookSquare.rank + dir.rank,
         };
-        
+
         while (isValidSquare(current)) {
             if (current.file === targetSquare.file && current.rank === targetSquare.rank) {
                 return true; // Found target square along this line
             }
-            
+
             // If we encounter any piece on an intermediate square, the path is blocked
             if (!isSquareEmpty(board, current)) {
                 break; // Path is blocked by an intermediate piece
             }
-            
+
             current.file += dir.file;
             current.rank += dir.rank;
         }

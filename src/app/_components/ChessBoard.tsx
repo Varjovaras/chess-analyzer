@@ -1,6 +1,7 @@
 "use client";
 
-import type { Board, Square, Piece } from "~/chess/types";
+import type { Board, Piece, Square } from "~/chess";
+
 
 interface ChessBoardProps {
   board: Board;

@@ -1,4 +1,4 @@
-import type { GameState, Move, Square, Color, Board, GameResult } from "../types";
+import type { GameState, Move, Square, Color, Board, GameResult } from "..";
 import { createInitialGameState, cloneGameState, switchPlayer, updateMoveCounters, addMoveToHistory } from "./game-state";
 import { isValidMove, simulateMove } from "./move-validation";
 import { isKingInCheck } from "../rules/check-detection";
@@ -6,9 +6,10 @@ import { updateCastlingRights, getCastlingMoves, isCastlingMove, getCastlingType
 import { evaluateDrawConditions } from "../rules/draw-conditions";
 import { getPieceAt, setPieceAt } from "../board";
 import { getPieceMoves } from "../pieces";
+import type { Piece } from "../types";
 
 export class Chess {
-    private constructor(private state: GameState) {}
+    private constructor(private state: GameState) { }
 
     static newGame(): Chess {
         return new Chess(createInitialGameState());
@@ -23,7 +24,7 @@ export class Chess {
     }
 
     getBoard(): Board {
-        return this.state.board.map((rank) => [...rank]);
+        return this.state.board.map((rank: (Piece | null)[]) => [...rank]);
     }
 
     getCurrentPlayer(): Color {
@@ -218,10 +219,10 @@ export class Chess {
         for (const castlingTo of castlingMoves) {
             const kingSquare = { file: 4, rank: this.state.currentPlayer === "WHITE" ? 0 : 7 };
             const king = getPieceAt(this.state.board, kingSquare);
-            
+
             if (king && king.type === "KING") {
                 const castlingType = getCastlingType(kingSquare, castlingTo);
-                
+
                 moves.push({
                     from: kingSquare,
                     to: castlingTo,

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Chess } from "~/chess";
-import type { Square } from "~/chess/types";
+import { Chess, type Square } from "~/chess";
 import ChessBoard from "~/app/_components/ChessBoard";
 
 export default function ChessPage() {

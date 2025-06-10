@@ -1,4 +1,4 @@
-import type { Board, Square, Color } from "../types";
+import type { Board, Color, Square } from "..";
 import { isValidSquare, isSquareEmpty, isSquareOccupiedBy } from "../board";
 
 export function getBishopMoves(board: Board, square: Square, color: Color): Square[] {
@@ -25,7 +25,7 @@ export function isBishopAttackingSquare(
     // Check if target is on same diagonal
     const fileDiff = Math.abs(bishopSquare.file - targetSquare.file);
     const rankDiff = Math.abs(bishopSquare.rank - targetSquare.rank);
-    
+
     if (fileDiff !== rankDiff) {
         return false; // Not on same diagonal
     }
@@ -43,17 +43,17 @@ export function isBishopAttackingSquare(
             file: bishopSquare.file + dir.file,
             rank: bishopSquare.rank + dir.rank,
         };
-        
+
         while (isValidSquare(current)) {
             if (current.file === targetSquare.file && current.rank === targetSquare.rank) {
                 return true; // Found target square along this line
             }
-            
+
             // If we encounter any piece on an intermediate square, the path is blocked
             if (!isSquareEmpty(board, current)) {
                 break; // Path is blocked by an intermediate piece
             }
-            
+
             current.file += dir.file;
             current.rank += dir.rank;
         }

@@ -1,4 +1,4 @@
-import type { Board, Piece, Square, Color, PieceType } from "../types";
+import type { Board, Color, Piece, PieceType, Square } from "..";
 
 export const FILES = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 export const RANKS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
@@ -52,7 +52,7 @@ export function setPieceAt(
 ): Board {
     if (!isValidSquare(square)) return board;
 
-    const newBoard = board.map((rank) => [...rank]);
+    const newBoard = board.map((rank: (Piece | null)[]) => [...rank]);
     const targetRank = newBoard[square.rank];
     if (targetRank) {
         targetRank[square.file] = piece;

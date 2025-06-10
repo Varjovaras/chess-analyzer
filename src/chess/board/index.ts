@@ -1,5 +1,3 @@
-// Board module exports
-
 export {
     FILES,
     RANKS,

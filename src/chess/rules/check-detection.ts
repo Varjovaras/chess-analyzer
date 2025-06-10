@@ -13,7 +13,7 @@ export function isKingInCheck(board: Board, color: Color): boolean {
 export function isSquareAttackedBy(
     board: Board,
     square: Square,
-    byColor: Color
+    byColor: Color,
 ): boolean {
     return isSquareUnderAttackBy(board, square, byColor);
 }
@@ -21,7 +21,7 @@ export function isSquareAttackedBy(
 export function getAttackingPieces(
     board: Board,
     targetSquare: Square,
-    byColor: Color
+    byColor: Color,
 ): Square[] {
     const attackers: Square[] = [];
 
@@ -35,11 +35,13 @@ export function getAttackingPieces(
                     // We need a more specific check here to verify this exact piece is attacking
                     // For now, we'll use the general attack detection
                     // This could be improved by checking piece-specific attack patterns
-                    const testBoard = board.map(rank => [...rank]);
+                    const testBoard = board.map((rank) => [...rank]);
                     testBoard[square.rank]![square.file] = null;
-                    
+
                     // If removing this piece stops the attack, then this piece was attacking
-                    if (!isSquareUnderAttackBy(testBoard, targetSquare, byColor)) {
+                    if (
+                        !isSquareUnderAttackBy(testBoard, targetSquare, byColor)
+                    ) {
                         attackers.push(square);
                     }
                 }
@@ -56,7 +58,7 @@ export function isDoubleCheck(board: Board, kingColor: Color): boolean {
 
     const opponentColor = kingColor === "WHITE" ? "BLACK" : "WHITE";
     const attackers = getAttackingPieces(board, kingSquare, opponentColor);
-    
+
     return attackers.length >= 2;
 }
 
@@ -73,22 +75,22 @@ export function getCheckingPieces(board: Board, kingColor: Color): Square[] {
 export function canBlockCheck(
     board: Board,
     kingColor: Color,
-    blockingSquare: Square
+    blockingSquare: Square,
 ): boolean {
     const kingSquare = findKing(board, kingColor);
     if (!kingSquare) return false;
 
     const checkingPieces = getCheckingPieces(board, kingColor);
-    
+
     // Can't block double check
     if (checkingPieces.length > 1) return false;
-    
+
     // No check to block
     if (checkingPieces.length === 0) return false;
 
     const checkingPiece = checkingPieces[0]!;
     const checkingPieceData = getPieceAt(board, checkingPiece);
-    
+
     if (!checkingPieceData) return false;
 
     // Knight checks cannot be blocked (only captured or king moves)
@@ -102,7 +104,7 @@ export function canBlockCheck(
 export function isSquareOnLineBetween(
     start: Square,
     end: Square,
-    middle: Square
+    middle: Square,
 ): boolean {
     // Check if three squares are collinear and middle is between start and end
     const dx1 = end.file - start.file;
@@ -129,14 +131,14 @@ export function wouldMoveResolveCheck(
     board: Board,
     kingColor: Color,
     fromSquare: Square,
-    toSquare: Square
+    toSquare: Square,
 ): boolean {
     // Simulate the move
     const piece = getPieceAt(board, fromSquare);
     if (!piece || piece.color !== kingColor) return false;
 
     // Create a copy of the board with the move applied
-    const testBoard = board.map(rank => [...rank]);
+    const testBoard = board.map((rank) => [...rank]);
     testBoard[fromSquare.rank]![fromSquare.file] = null;
     testBoard[toSquare.rank]![toSquare.file] = piece;
 
@@ -147,19 +149,22 @@ export function wouldMoveResolveCheck(
 export function isPiecePinned(
     board: Board,
     pieceSquare: Square,
-    kingColor: Color
+    kingColor: Color,
 ): boolean {
     const piece = getPieceAt(board, pieceSquare);
-    if (!piece || piece.color !== kingColor || piece.type === "KING") return false;
+    if (!piece || piece.color !== kingColor || piece.type === "KING")
+        return false;
 
     const kingSquare = findKing(board, kingColor);
     if (!kingSquare) return false;
 
     // Remove the piece temporarily and see if king comes under attack
-    const testBoard = board.map(rank => [...rank]);
+    const testBoard = board.map((rank) => [...rank]);
     testBoard[pieceSquare.rank]![pieceSquare.file] = null;
 
     const opponentColor = kingColor === "WHITE" ? "BLACK" : "WHITE";
-    return isSquareUnderAttackBy(testBoard, kingSquare, opponentColor) &&
-           !isKingInCheck(board, kingColor);
+    return (
+        isSquareUnderAttackBy(testBoard, kingSquare, opponentColor) &&
+        !isKingInCheck(board, kingColor)
+    );
 }

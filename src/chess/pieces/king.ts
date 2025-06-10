@@ -1,4 +1,4 @@
-import type { Board, Square, Color } from "../types";
+import type { Board, Square, Color } from "..";
 import { isValidSquare, isSquareOccupiedBy } from "../board";
 
 export function getKingMoves(board: Board, square: Square, color: Color): Square[] {

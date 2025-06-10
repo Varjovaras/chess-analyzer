@@ -20,11 +20,13 @@ export function createInitialGameState(): GameState {
 
 export function cloneGameState(state: GameState): GameState {
     return {
-        board: state.board.map(rank => [...rank]),
+        board: state.board.map((rank) => [...rank]),
         currentPlayer: state.currentPlayer,
         moveHistory: [...state.moveHistory],
         castlingRights: { ...state.castlingRights },
-        enPassantTarget: state.enPassantTarget ? { ...state.enPassantTarget } : null,
+        enPassantTarget: state.enPassantTarget
+            ? { ...state.enPassantTarget }
+            : null,
         halfmoveClock: state.halfmoveClock,
         fullmoveNumber: state.fullmoveNumber,
     };
@@ -37,12 +39,13 @@ export function switchPlayer(color: Color): Color {
 export function updateMoveCounters(
     state: GameState,
     move: Move,
-    wasCaptureOrPawnMove: boolean
+    wasCaptureOrPawnMove: boolean,
 ): { halfmoveClock: number; fullmoveNumber: number } {
     const halfmoveClock = wasCaptureOrPawnMove ? 0 : state.halfmoveClock + 1;
-    const fullmoveNumber = state.currentPlayer === "BLACK" 
-        ? state.fullmoveNumber + 1 
-        : state.fullmoveNumber;
+    const fullmoveNumber =
+        state.currentPlayer === "BLACK"
+            ? state.fullmoveNumber + 1
+            : state.fullmoveNumber;
 
     return { halfmoveClock, fullmoveNumber };
 }
@@ -52,8 +55,8 @@ export function addMoveToHistory(state: GameState, move: Move): Move[] {
 }
 
 export function getLastMove(state: GameState): Move | null {
-    return state.moveHistory.length > 0 
-        ? state.moveHistory[state.moveHistory.length - 1]! 
+    return state.moveHistory.length > 0
+        ? state.moveHistory[state.moveHistory.length - 1]!
         : null;
 }
 
@@ -77,14 +80,19 @@ export function wasCaptureOrPawnMove(move: Move): boolean {
     return isPawnMove(move) || isCaptureMove(move);
 }
 
-export function isGameStateEqual(state1: GameState, state2: GameState): boolean {
+export function isGameStateEqual(
+    state1: GameState,
+    state2: GameState,
+): boolean {
     // Simple comparison - in a full implementation, this would need to be more thorough
     return (
         state1.currentPlayer === state2.currentPlayer &&
         state1.halfmoveClock === state2.halfmoveClock &&
         state1.fullmoveNumber === state2.fullmoveNumber &&
-        JSON.stringify(state1.castlingRights) === JSON.stringify(state2.castlingRights) &&
-        JSON.stringify(state1.enPassantTarget) === JSON.stringify(state2.enPassantTarget)
+        JSON.stringify(state1.castlingRights) ===
+            JSON.stringify(state2.castlingRights) &&
+        JSON.stringify(state1.enPassantTarget) ===
+            JSON.stringify(state2.enPassantTarget)
         // Note: Board comparison would need deep equality check
     );
 }
@@ -95,32 +103,36 @@ export function validateGameState(state: GameState): boolean {
     if (!["WHITE", "BLACK"].includes(state.currentPlayer)) return false;
     if (state.halfmoveClock < 0) return false;
     if (state.fullmoveNumber < 1) return false;
-    
+
     // Validate board dimensions
     for (const rank of state.board) {
         if (!rank || rank.length !== 8) return false;
     }
-    
+
     return true;
 }
 
 export function getGameStateSignature(state: GameState): string {
     // Create a simplified signature for position comparison
     // This is used for repetition detection
-    const boardStr = state.board.map(rank => 
-        rank.map(piece => piece ? `${piece.type}${piece.color}` : ".").join("")
-    ).join("");
-    
+    const boardStr = state.board
+        .map((rank) =>
+            rank
+                .map((piece) => (piece ? `${piece.type}${piece.color}` : "."))
+                .join(""),
+        )
+        .join("");
+
     const castlingStr = [
         state.castlingRights.whiteKingside ? "K" : "",
         state.castlingRights.whiteQueenside ? "Q" : "",
         state.castlingRights.blackKingside ? "k" : "",
         state.castlingRights.blackQueenside ? "q" : "",
     ].join("");
-    
-    const enPassantStr = state.enPassantTarget 
+
+    const enPassantStr = state.enPassantTarget
         ? `${state.enPassantTarget.file}${state.enPassantTarget.rank}`
         : "-";
-    
+
     return `${boardStr}|${state.currentPlayer}|${castlingStr}|${enPassantStr}`;
 }

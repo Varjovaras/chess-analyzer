@@ -1,4 +1,4 @@
-import type { Board, Square, Color } from "../types";
+import type { Board, Square, Color } from "..";
 import { getRookMoves, isRookAttackingSquare } from "./rook";
 import { getBishopMoves, isBishopAttackingSquare } from "./bishop";
 

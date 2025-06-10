@@ -1,4 +1,4 @@
-import type { Board, Square, Color } from "../types";
+import type { Board, Square, Color } from "..";
 import { isValidSquare, isSquareEmpty, isSquareOccupiedBy } from "../board";
 
 export function getPawnMoves(board: Board, square: Square, color: Color): Square[] {
@@ -63,7 +63,7 @@ export function isPawnAttackingSquare(
     pawnColor: Color
 ): boolean {
     const direction = pawnColor === "WHITE" ? 1 : -1;
-    
+
     // Check diagonal captures
     const captureLeft = {
         file: pawnSquare.file - 1,

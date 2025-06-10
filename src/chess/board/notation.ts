@@ -1,4 +1,4 @@
-import type { Square } from "../types";
+import type { Square } from "..";
 import { fileCharToIndex, rankCharToIndex, fileIndexToChar, rankIndexToChar } from "../utils/string";
 import { isValidSquare } from "./board";
 

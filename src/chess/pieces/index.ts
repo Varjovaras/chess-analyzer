@@ -1,5 +1,3 @@
-// Main pieces module - exports all piece movement functions
-
 import type { Board, Square, Color } from "../types";
 import { getPieceAt } from "../board";
 import { getPawnMoves, isPawnAttackingSquare } from "./pawn";
@@ -42,7 +40,14 @@ export function isSquareUnderAttackBy(
             const attackerPiece = getPieceAt(board, attackerSquare);
 
             if (attackerPiece && attackerPiece.color === byColor) {
-                if (isPieceAttackingSquare(attackerSquare, square, attackerPiece.type, board)) {
+                if (
+                    isPieceAttackingSquare(
+                        attackerSquare,
+                        square,
+                        attackerPiece.type,
+                        board,
+                    )
+                ) {
                     return true;
                 }
             }
@@ -55,12 +60,15 @@ function isPieceAttackingSquare(
     pieceSquare: Square,
     targetSquare: Square,
     pieceType: string,
-    board: Board
+    board: Board,
 ): boolean {
     switch (pieceType) {
-        case "PAWN":
+        case "PAWN": {
             const piece = getPieceAt(board, pieceSquare);
-            return piece ? isPawnAttackingSquare(pieceSquare, targetSquare, piece.color) : false;
+            return piece
+                ? isPawnAttackingSquare(pieceSquare, targetSquare, piece.color)
+                : false;
+        }
         case "ROOK":
             return isRookAttackingSquare(pieceSquare, targetSquare, board);
         case "KNIGHT":

@@ -1,4 +1,4 @@
-import type { Board, Color, Square, GameState } from "../types";
+import type { Board, Color, Square } from "..";
 import { getPieceAt, isSquareEmpty } from "../board";
 import { isSquareUnderAttackBy } from "../pieces";
 
@@ -182,6 +182,6 @@ export function isCastlingMove(from: Square, to: Square, pieceType: string): boo
 
 export function getCastlingType(from: Square, to: Square): 'KINGSIDE' | 'QUEENSIDE' | null {
     if (!isCastlingMove(from, to, "KING")) return null;
-    
+
     return to.file === 6 ? 'KINGSIDE' : 'QUEENSIDE';
 }
