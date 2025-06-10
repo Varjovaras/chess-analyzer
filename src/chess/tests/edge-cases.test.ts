@@ -80,9 +80,9 @@ describe('Chess Edge Cases and Complex Rules', () => {
     test('Insufficient material - bishops on same color squares', () => {
       const board = createEmptyBoard();
       let testBoard = setPieceAt(board, { file: 4, rank: 4 }, { type: 'KING', color: 'WHITE' });
-      testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'BISHOP', color: 'WHITE' }); // Light square
+      testBoard = setPieceAt(testBoard, { file: 0, rank: 0 }, { type: 'BISHOP', color: 'WHITE' }); // Dark square (0+0=0)
       testBoard = setPieceAt(testBoard, { file: 0, rank: 7 }, { type: 'KING', color: 'BLACK' });
-      testBoard = setPieceAt(testBoard, { file: 1, rank: 0 }, { type: 'BISHOP', color: 'BLACK' }); // Light square
+      testBoard = setPieceAt(testBoard, { file: 1, rank: 1 }, { type: 'BISHOP', color: 'BLACK' }); // Dark square (1+1=2, 2%2=0)
 
       const game = Chess.fromState({
         board: testBoard,

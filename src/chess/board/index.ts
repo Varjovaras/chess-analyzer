@@ -1,4 +1,5 @@
-// Re-export from the new modular board structure
+// Board module exports
+
 export {
     FILES,
     RANKS,
@@ -11,7 +12,7 @@ export {
     isSquareEmpty,
     getSquaresByColor,
     findKing,
-} from './board/board';
+} from './board';
 
 export {
     algebraicToSquare,
@@ -19,4 +20,4 @@ export {
     parseSquareList,
     formatSquareList,
     isValidAlgebraicNotation,
-} from './board/notation';
+} from './notation';
