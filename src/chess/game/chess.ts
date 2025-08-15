@@ -1,15 +1,26 @@
 import type { GameState, Move, Square, Color, Board, GameResult } from "..";
-import { createInitialGameState, cloneGameState, switchPlayer, updateMoveCounters, addMoveToHistory } from "./game-state";
+import {
+    createInitialGameState,
+    cloneGameState,
+    switchPlayer,
+    updateMoveCounters,
+    addMoveToHistory,
+} from "./game-state";
 import { isValidMove, simulateMove } from "./move-validation";
 import { isKingInCheck } from "../rules/check-detection";
-import { updateCastlingRights, getCastlingMoves, isCastlingMove, getCastlingType } from "../rules/castling";
+import {
+    updateCastlingRights,
+    getCastlingMoves,
+    isCastlingMove,
+    getCastlingType,
+} from "../rules/castling";
 import { evaluateDrawConditions } from "../rules/draw-conditions";
 import { getPieceAt, setPieceAt } from "../board";
 import { getPieceMoves } from "../pieces";
 import type { Piece } from "../types";
 
 export class Chess {
-    private constructor(private state: GameState) { }
+    private constructor(private state: GameState) {}
 
     static newGame(): Chess {
         return new Chess(createInitialGameState());
@@ -48,6 +59,11 @@ export class Chess {
             return this.makeCastlingMove(from, to);
         }
 
+        // Check if this is an en passant move
+        if (this.isEnPassantMove(from, to, piece)) {
+            return this.makeEnPassantMove(from, to);
+        }
+
         // Regular move
         return this.makeRegularMove(from, to);
     }
@@ -74,15 +90,18 @@ export class Chess {
             piece.type,
             piece.color,
             capturedPiece?.type,
-            capturedPiece?.color
+            capturedPiece?.color,
         );
 
         // Update move counters
         const { halfmoveClock, fullmoveNumber } = updateMoveCounters(
             this.state,
             move,
-            capturedPiece !== null || piece.type === "PAWN"
+            capturedPiece !== null || piece.type === "PAWN",
         );
+
+        // Set en passant target if pawn moved two squares
+        const enPassantTarget = this.getEnPassantTarget(from, to, piece);
 
         const newState: GameState = {
             ...this.state,
@@ -92,7 +111,7 @@ export class Chess {
             castlingRights: newCastlingRights,
             halfmoveClock,
             fullmoveNumber,
-            enPassantTarget: null, // TODO: Implement en passant
+            enPassantTarget,
         };
 
         return new Chess(newState);
@@ -106,7 +125,7 @@ export class Chess {
         if (!castlingType) return null;
 
         const color = piece.color;
-        const isKingside = castlingType === 'KINGSIDE';
+        const isKingside = castlingType === "KINGSIDE";
         const rookFromFile = isKingside ? 7 : 0;
         const rookToFile = isKingside ? 5 : 3;
         const rank = color === "WHITE" ? 0 : 7;
@@ -123,7 +142,7 @@ export class Chess {
             from,
             to,
             piece,
-            castling: castlingType
+            castling: castlingType,
         };
 
         // Apply castling to board (move both king and rook)
@@ -138,13 +157,13 @@ export class Chess {
             from,
             to,
             piece.type,
-            piece.color
+            piece.color,
         );
 
         const { halfmoveClock, fullmoveNumber } = updateMoveCounters(
             this.state,
             move,
-            false // Castling is not a pawn move or capture
+            false, // Castling is not a pawn move or capture
         );
 
         const newState: GameState = {
@@ -167,20 +186,113 @@ export class Chess {
         // Handle pawn promotion
         let pieceToPlace = move.piece;
         if (move.piece.type === "PAWN") {
-            const isPromotion = (move.piece.color === "WHITE" && move.to.rank === 7) ||
+            const isPromotion =
+                (move.piece.color === "WHITE" && move.to.rank === 7) ||
                 (move.piece.color === "BLACK" && move.to.rank === 0);
 
             if (isPromotion) {
                 // Default promotion to queen
                 pieceToPlace = {
                     type: "QUEEN",
-                    color: move.piece.color
+                    color: move.piece.color,
                 };
             }
         }
 
         newBoard = setPieceAt(newBoard, move.to, pieceToPlace);
         return newBoard;
+    }
+
+    private isEnPassantMove(from: Square, to: Square, piece: Piece): boolean {
+        if (piece.type !== "PAWN") return false;
+        if (!this.state.enPassantTarget) return false;
+
+        return (
+            to.file === this.state.enPassantTarget.file &&
+            to.rank === this.state.enPassantTarget.rank
+        );
+    }
+
+    private makeEnPassantMove(from: Square, to: Square): Chess | null {
+        const piece = getPieceAt(this.state.board, from);
+        if (!piece || piece.type !== "PAWN") return null;
+        if (!this.state.enPassantTarget) return null;
+
+        // Determine the captured pawn's position
+        const capturedPawnRank = piece.color === "WHITE" ? 4 : 3;
+        const capturedPawnSquare = {
+            file: this.state.enPassantTarget.file,
+            rank: capturedPawnRank,
+        };
+
+        const capturedPawn = getPieceAt(this.state.board, capturedPawnSquare);
+        if (!capturedPawn || capturedPawn.type !== "PAWN") return null;
+
+        const move: Move = {
+            from,
+            to,
+            piece,
+            captured: capturedPawn,
+            enPassant: true,
+        };
+
+        // Apply en passant move to board
+        let newBoard = setPieceAt(this.state.board, from, null);
+        newBoard = setPieceAt(newBoard, capturedPawnSquare, null); // Remove captured pawn
+        newBoard = setPieceAt(newBoard, to, piece); // Place moving pawn
+
+        // Check if this move would leave king in check
+        if (isKingInCheck(newBoard, this.state.currentPlayer)) {
+            return null;
+        }
+
+        // Update castling rights (shouldn't change for en passant, but be consistent)
+        const newCastlingRights = updateCastlingRights(
+            this.state.castlingRights,
+            from,
+            to,
+            piece.type,
+            piece.color,
+        );
+
+        const { halfmoveClock, fullmoveNumber } = updateMoveCounters(
+            this.state,
+            move,
+            true, // En passant is a pawn move and capture
+        );
+
+        const newState: GameState = {
+            ...this.state,
+            board: newBoard,
+            currentPlayer: switchPlayer(this.state.currentPlayer),
+            moveHistory: addMoveToHistory(this.state, move),
+            castlingRights: newCastlingRights,
+            halfmoveClock,
+            fullmoveNumber,
+            enPassantTarget: null, // Clear en passant target after use
+        };
+
+        return new Chess(newState);
+    }
+
+    private getEnPassantTarget(
+        from: Square,
+        to: Square,
+        piece: Piece,
+    ): Square | null {
+        // Only pawns can create en passant targets
+        if (piece.type !== "PAWN") return null;
+
+        // Check if pawn moved two squares forward from starting position
+        const twoSquareMove = Math.abs(to.rank - from.rank) === 2;
+        if (!twoSquareMove) return null;
+
+        const startRank = piece.color === "WHITE" ? 1 : 6;
+        if (from.rank !== startRank) return null;
+
+        // En passant target is the square the pawn "jumped over"
+        const targetRank = piece.color === "WHITE" ? 2 : 5;
+        return { file: to.file, rank: targetRank };
     }
 
     getValidMoves(): Move[] {
@@ -192,7 +304,11 @@ export class Chess {
                 const piece = getPieceAt(this.state.board, from);
 
                 if (piece && piece.color === this.state.currentPlayer) {
-                    const possibleMoves = getPieceMoves(this.state.board, from);
+                    const possibleMoves = getPieceMoves(
+                        this.state.board,
+                        from,
+                        this.state.enPassantTarget,
+                    );
 
                     for (const to of possibleMoves) {
                         if (isValidMove(this.state, from, to)) {
@@ -200,7 +316,9 @@ export class Chess {
                                 from,
                                 to,
                                 piece,
-                                captured: getPieceAt(this.state.board, to) || undefined,
+                                captured:
+                                    getPieceAt(this.state.board, to) ||
+                                    undefined,
                             });
                         }
                     }
@@ -213,11 +331,14 @@ export class Chess {
             this.state.board,
             this.state.currentPlayer,
             this.state.castlingRights,
-            this.isInCheck()
+            this.isInCheck(),
         );
 
         for (const castlingTo of castlingMoves) {
-            const kingSquare = { file: 4, rank: this.state.currentPlayer === "WHITE" ? 0 : 7 };
+            const kingSquare = {
+                file: 4,
+                rank: this.state.currentPlayer === "WHITE" ? 0 : 7,
+            };
             const king = getPieceAt(this.state.board, kingSquare);
 
             if (king && king.type === "KING") {
@@ -227,7 +348,7 @@ export class Chess {
                     from: kingSquare,
                     to: castlingTo,
                     piece: king,
-                    castling: castlingType || undefined
+                    castling: castlingType || undefined,
                 });
             }
         }

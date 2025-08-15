@@ -7,13 +7,17 @@ import { getBishopMoves, isBishopAttackingSquare } from "./bishop";
 import { getQueenMoves, isQueenAttackingSquare } from "./queen";
 import { getKingMoves, isKingAttackingSquare } from "./king";
 
-export function getPieceMoves(board: Board, square: Square): Square[] {
+export function getPieceMoves(
+    board: Board,
+    square: Square,
+    enPassantTarget?: Square | null,
+): Square[] {
     const piece = getPieceAt(board, square);
     if (!piece) return [];
 
     switch (piece.type) {
         case "PAWN":
-            return getPawnMoves(board, square, piece.color);
+            return getPawnMoves(board, square, piece.color, enPassantTarget);
         case "ROOK":
             return getRookMoves(board, square, piece.color);
         case "KNIGHT":
@@ -88,6 +92,7 @@ export function isValidPieceMove(
     board: Board,
     from: Square,
     to: Square,
+    enPassantTarget?: Square | null,
 ): boolean {
     const piece = getPieceAt(board, from);
     if (!piece) return false;
@@ -102,7 +107,7 @@ export function isValidPieceMove(
         return true;
     }
 
-    const possibleMoves = getPieceMoves(board, from);
+    const possibleMoves = getPieceMoves(board, from, enPassantTarget);
     return possibleMoves.some(
         (move) => move.file === to.file && move.rank === to.rank,
     );

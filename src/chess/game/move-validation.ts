@@ -2,12 +2,16 @@ import type { Board, Square, Color, Move, GameState } from "..";
 import { getPieceAt, setPieceAt } from "../board";
 import { isValidPieceMove } from "../pieces";
 import { isKingInCheck } from "../rules/check-detection";
-import { isCastlingMove, canCastleKingside, canCastleQueenside } from "../rules/castling";
+import {
+    isCastlingMove,
+    canCastleKingside,
+    canCastleQueenside,
+} from "../rules/castling";
 
 export function isValidMove(
     gameState: GameState,
     from: Square,
-    to: Square
+    to: Square,
 ): boolean {
     const piece = getPieceAt(gameState.board, from);
 
@@ -21,10 +25,16 @@ export function isValidMove(
     }
 
     // Check if the piece can legally move to the target square
-    if (!isValidPieceMove(gameState.board, from, to)) return false;
+    if (!isValidPieceMove(gameState.board, from, to, gameState.enPassantTarget))
+        return false;
 
     // Check if the move would leave own king in check
-    const testBoard = simulateMove(gameState.board, from, to);
+    const testBoard = simulateMove(
+        gameState.board,
+        from,
+        to,
+        gameState.enPassantTarget,
+    );
     if (isKingInCheck(testBoard, gameState.currentPlayer)) {
         return false;
     }
@@ -35,7 +45,7 @@ export function isValidMove(
 export function isValidCastlingMove(
     gameState: GameState,
     from: Square,
-    to: Square
+    to: Square,
 ): boolean {
     const piece = getPieceAt(gameState.board, from);
     if (!piece || piece.type !== "KING") return false;
@@ -53,7 +63,7 @@ export function isValidCastlingMove(
             gameState.board,
             color,
             gameState.castlingRights,
-            isCurrentlyInCheck
+            isCurrentlyInCheck,
         );
     }
 
@@ -62,29 +72,51 @@ export function isValidCastlingMove(
             gameState.board,
             color,
             gameState.castlingRights,
-            isCurrentlyInCheck
+            isCurrentlyInCheck,
         );
     }
 
     return false;
 }
 
-export function simulateMove(board: Board, from: Square, to: Square): Board {
+export function simulateMove(
+    board: Board,
+    from: Square,
+    to: Square,
+    enPassantTarget?: Square | null,
+): Board {
     const piece = getPieceAt(board, from);
     if (!piece) return board;
 
     let newBoard = setPieceAt(board, from, null);
 
+    // Handle en passant capture
+    if (
+        piece.type === "PAWN" &&
+        enPassantTarget &&
+        to.file === enPassantTarget.file &&
+        to.rank === enPassantTarget.rank
+    ) {
+        // Remove the captured pawn (not at the destination square)
+        const capturedPawnRank = piece.color === "WHITE" ? 4 : 3;
+        const capturedPawnSquare = {
+            file: enPassantTarget.file,
+            rank: capturedPawnRank,
+        };
+        newBoard = setPieceAt(newBoard, capturedPawnSquare, null);
+    }
+
     // Handle pawn promotion (default to queen)
     let pieceToPlace = piece;
     if (piece.type === "PAWN") {
-        const isPromotion = (piece.color === "WHITE" && to.rank === 7) ||
+        const isPromotion =
+            (piece.color === "WHITE" && to.rank === 7) ||
             (piece.color === "BLACK" && to.rank === 0);
 
         if (isPromotion) {
             pieceToPlace = {
                 type: "QUEEN",
-                color: piece.color
+                color: piece.color,
             };
         }
     }
@@ -97,22 +129,20 @@ export function wouldMoveExposeKing(
     board: Board,
     from: Square,
     to: Square,
-    kingColor: Color
+    kingColor: Color,
+    enPassantTarget?: Square | null,
 ): boolean {
-    const testBoard = simulateMove(board, from, to);
+    const testBoard = simulateMove(board, from, to, enPassantTarget);
     return isKingInCheck(testBoard, kingColor);
 }
 
-export function isMoveLegal(
-    gameState: GameState,
-    move: Move
-): boolean {
+export function isMoveLegal(gameState: GameState, move: Move): boolean {
     return isValidMove(gameState, move.from, move.to);
 }
 
 export function validateMoveSequence(
     initialState: GameState,
-    moves: Move[]
+    moves: Move[],
 ): { isValid: boolean; errorMove?: Move; errorMessage?: string } {
     let currentState = initialState;
 
@@ -121,16 +151,22 @@ export function validateMoveSequence(
             return {
                 isValid: false,
                 errorMove: move,
-                errorMessage: `Invalid move: ${JSON.stringify(move)}`
+                errorMessage: `Invalid move: ${JSON.stringify(move)}`,
             };
         }
 
         // Apply the move (simplified - in practice would use the full game logic)
-        const newBoard = simulateMove(currentState.board, move.from, move.to);
+        const newBoard = simulateMove(
+            currentState.board,
+            move.from,
+            move.to,
+            currentState.enPassantTarget,
+        );
         currentState = {
             ...currentState,
             board: newBoard,
-            currentPlayer: currentState.currentPlayer === "WHITE" ? "BLACK" : "WHITE"
+            currentPlayer:
+                currentState.currentPlayer === "WHITE" ? "BLACK" : "WHITE",
         };
     }
 
@@ -140,7 +176,7 @@ export function validateMoveSequence(
 export function getMoveValidationError(
     gameState: GameState,
     from: Square,
-    to: Square
+    to: Square,
 ): string | null {
     const piece = getPieceAt(gameState.board, from);
 
@@ -156,11 +192,21 @@ export function getMoveValidationError(
         if (!isValidCastlingMove(gameState, from, to)) {
             return "Invalid castling move";
         }
-    } else if (!isValidPieceMove(gameState.board, from, to)) {
+    } else if (
+        !isValidPieceMove(gameState.board, from, to, gameState.enPassantTarget)
+    ) {
         return "Piece cannot move to target square";
     }
 
-    if (wouldMoveExposeKing(gameState.board, from, to, gameState.currentPlayer)) {
+    if (
+        wouldMoveExposeKing(
+            gameState.board,
+            from,
+            to,
+            gameState.currentPlayer,
+            gameState.enPassantTarget,
+        )
+    ) {
         return "Move would leave king in check";
     }
 
@@ -170,28 +216,37 @@ export function getMoveValidationError(
 export function isSquareAttacked(
     board: Board,
     square: Square,
-    byColor: Color
+    byColor: Color,
 ): boolean {
     // This is a helper function that uses the check detection logic
     return isKingInCheck(
-        setPieceAt(board, square, { type: "KING", color: byColor === "WHITE" ? "BLACK" : "WHITE" }),
-        byColor === "WHITE" ? "BLACK" : "WHITE"
+        setPieceAt(board, square, {
+            type: "KING",
+            color: byColor === "WHITE" ? "BLACK" : "WHITE",
+        }),
+        byColor === "WHITE" ? "BLACK" : "WHITE",
     );
 }
 
 export function canPieceReachSquare(
     board: Board,
     pieceSquare: Square,
-    targetSquare: Square
+    targetSquare: Square,
+    enPassantTarget?: Square | null,
 ): boolean {
-    return isValidPieceMove(board, pieceSquare, targetSquare);
+    return isValidPieceMove(board, pieceSquare, targetSquare, enPassantTarget);
 }
 
 export function isKingInCheckAfterMove(
     gameState: GameState,
     from: Square,
-    to: Square
+    to: Square,
 ): boolean {
-    const testBoard = simulateMove(gameState.board, from, to);
+    const testBoard = simulateMove(
+        gameState.board,
+        from,
+        to,
+        gameState.enPassantTarget,
+    );
     return isKingInCheck(testBoard, gameState.currentPlayer);
 }

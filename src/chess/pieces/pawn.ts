@@ -1,7 +1,12 @@
 import type { Board, Square, Color } from "..";
 import { isValidSquare, isSquareEmpty, isSquareOccupiedBy } from "../board";
 
-export function getPawnMoves(board: Board, square: Square, color: Color): Square[] {
+export function getPawnMoves(
+    board: Board,
+    square: Square,
+    color: Color,
+    enPassantTarget?: Square | null,
+): Square[] {
     const moves: Square[] = [];
     const direction = color === "WHITE" ? 1 : -1;
     const startRank = color === "WHITE" ? 1 : 6;
@@ -54,13 +59,30 @@ export function getPawnMoves(board: Board, square: Square, color: Color): Square
         moves.push(captureRight);
     }
 
+    // En passant captures
+    if (enPassantTarget) {
+        const enPassantRank = color === "WHITE" ? 5 : 2; // 6th rank for white, 3rd rank for black
+        const pawnRank = color === "WHITE" ? 4 : 3; // 5th rank for white, 4th rank for black
+
+        // Check if pawn is on the correct rank for en passant
+        if (square.rank === pawnRank) {
+            // Check if en passant target is diagonally adjacent
+            if (
+                enPassantTarget.rank === enPassantRank &&
+                Math.abs(enPassantTarget.file - square.file) === 1
+            ) {
+                moves.push(enPassantTarget);
+            }
+        }
+    }
+
     return moves;
 }
 
 export function isPawnAttackingSquare(
     pawnSquare: Square,
     targetSquare: Square,
-    pawnColor: Color
+    pawnColor: Color,
 ): boolean {
     const direction = pawnColor === "WHITE" ? 1 : -1;
 

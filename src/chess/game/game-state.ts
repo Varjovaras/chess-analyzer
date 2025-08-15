@@ -54,10 +54,10 @@ export function addMoveToHistory(state: GameState, move: Move): Move[] {
     return [...state.moveHistory, move];
 }
 
-export function getLastMove(state: GameState): Move | null {
+export function getLastMove(state: GameState): Move | undefined {
     return state.moveHistory.length > 0
-        ? state.moveHistory[state.moveHistory.length - 1]!
-        : null;
+        ? state.moveHistory[state.moveHistory.length - 1]
+        : undefined;
 }
 
 export function getMoveNumber(state: GameState): number {
