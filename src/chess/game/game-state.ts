@@ -1,10 +1,35 @@
 import type { GameState, Board, Color, Move } from "../types";
 import { createInitialBoard } from "../board";
 
+export function getGameStateSignature(state: GameState): string {
+    // Create a simplified signature for position comparison
+    // This is used for repetition detection
+    const boardStr = state.board
+        .map((rank) =>
+            rank
+                .map((piece) => (piece ? `${piece.type}${piece.color}` : "."))
+                .join(""),
+        )
+        .join("");
+
+    const castlingStr = [
+        state.castlingRights.whiteKingside ? "K" : "",
+        state.castlingRights.whiteQueenside ? "Q" : "",
+        state.castlingRights.blackKingside ? "k" : "",
+        state.castlingRights.blackQueenside ? "q" : "",
+    ].join("");
+
+    const enPassantStr = state.enPassantTarget
+        ? `${state.enPassantTarget.file}${state.enPassantTarget.rank}`
+        : "-";
+
+    return `${boardStr}|${state.currentPlayer}|${castlingStr}|${enPassantStr}`;
+}
+
 export function createInitialGameState(): GameState {
-    return {
+    const initialState: GameState = {
         board: createInitialBoard(),
-        currentPlayer: "WHITE",
+        currentPlayer: "WHITE" as Color,
         moveHistory: [],
         castlingRights: {
             whiteKingside: true,
@@ -16,9 +41,16 @@ export function createInitialGameState(): GameState {
         halfmoveClock: 0,
         fullmoveNumber: 1,
     };
+
+    // Add the initial position to history
+    initialState.positionHistory = [getGameStateSignature(initialState)];
+    return initialState;
 }
 
 export function cloneGameState(state: GameState): GameState {
+    // Handle backward compatibility for states without positionHistory
+    const positionHistory = state.positionHistory || [];
+
     return {
         board: state.board.map((rank) => [...rank]),
         currentPlayer: state.currentPlayer,
@@ -29,6 +61,7 @@ export function cloneGameState(state: GameState): GameState {
             : null,
         halfmoveClock: state.halfmoveClock,
         fullmoveNumber: state.fullmoveNumber,
+        positionHistory: [...positionHistory],
     };
 }
 
@@ -52,6 +85,15 @@ export function updateMoveCounters(
 
 export function addMoveToHistory(state: GameState, move: Move): Move[] {
     return [...state.moveHistory, move];
+}
+
+export function addPositionToHistory(
+    state: GameState,
+    newState: GameState,
+): string[] {
+    const positionSignature = getGameStateSignature(newState);
+    const currentHistory = state.positionHistory || [];
+    return [...currentHistory, positionSignature];
 }
 
 export function getLastMove(state: GameState): Move | undefined {
@@ -112,27 +154,22 @@ export function validateGameState(state: GameState): boolean {
     return true;
 }
 
-export function getGameStateSignature(state: GameState): string {
-    // Create a simplified signature for position comparison
-    // This is used for repetition detection
-    const boardStr = state.board
-        .map((rank) =>
-            rank
-                .map((piece) => (piece ? `${piece.type}${piece.color}` : "."))
-                .join(""),
-        )
-        .join("");
+export function countPositionOccurrences(
+    positionHistory: string[],
+    position: string,
+): number {
+    return positionHistory.filter((p) => p === position).length;
+}
 
-    const castlingStr = [
-        state.castlingRights.whiteKingside ? "K" : "",
-        state.castlingRights.whiteQueenside ? "Q" : "",
-        state.castlingRights.blackKingside ? "k" : "",
-        state.castlingRights.blackQueenside ? "q" : "",
-    ].join("");
-
-    const enPassantStr = state.enPassantTarget
-        ? `${state.enPassantTarget.file}${state.enPassantTarget.rank}`
-        : "-";
-
-    return `${boardStr}|${state.currentPlayer}|${castlingStr}|${enPassantStr}`;
+export function isThreefoldRepetition(
+    positionHistory: string[],
+    currentPosition: string,
+): boolean {
+    // Count occurrences of the current position in history
+    // The position counts as occurring when it appears 3 times total
+    const occurrences = countPositionOccurrences(
+        positionHistory,
+        currentPosition,
+    );
+    return occurrences >= 3;
 }

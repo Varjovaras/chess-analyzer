@@ -5,8 +5,9 @@ import {
     switchPlayer,
     updateMoveCounters,
     addMoveToHistory,
+    addPositionToHistory,
 } from "./game-state";
-import { isValidMove, simulateMove } from "./move-validation";
+import { isValidMove } from "./move-validation";
 import { isKingInCheck } from "../rules/check-detection";
 import {
     updateCastlingRights,
@@ -17,7 +18,7 @@ import {
 import { evaluateDrawConditions } from "../rules/draw-conditions";
 import { getPieceAt, setPieceAt } from "../board";
 import { getPieceMoves } from "../pieces";
-import type { Piece } from "../types";
+import type { Piece, PieceType } from "../types";
 
 export class Chess {
     private constructor(private state: GameState) {}
@@ -46,7 +47,11 @@ export class Chess {
         return [...this.state.moveHistory];
     }
 
-    makeMove(from: Square, to: Square): Chess | null {
+    makeMove(
+        from: Square,
+        to: Square,
+        promotionPiece?: PieceType,
+    ): Chess | null {
         if (!isValidMove(this.state, from, to)) {
             return null;
         }
@@ -65,24 +70,46 @@ export class Chess {
         }
 
         // Regular move
-        return this.makeRegularMove(from, to);
+        return this.makeRegularMove(from, to, promotionPiece);
     }
 
-    private makeRegularMove(from: Square, to: Square): Chess | null {
+    private makeRegularMove(
+        from: Square,
+        to: Square,
+        promotionPiece?: PieceType,
+    ): Chess | null {
         const piece = getPieceAt(this.state.board, from);
         if (!piece) return null;
 
         const capturedPiece = getPieceAt(this.state.board, to);
+
+        // Check if this is a promotion move
+        const isPromotion =
+            piece.type === "PAWN" &&
+            ((piece.color === "WHITE" && to.rank === 7) ||
+                (piece.color === "BLACK" && to.rank === 0));
+
+        let finalPromotionPiece = promotionPiece;
+        if (isPromotion) {
+            if (promotionPiece && !this.isValidPromotionPiece(promotionPiece)) {
+                return null;
+            }
+
+            if (!promotionPiece) {
+                finalPromotionPiece = "QUEEN";
+            }
+        }
+
         const move: Move = {
             from,
             to,
             piece,
             captured: capturedPiece || undefined,
+            promotion: isPromotion ? finalPromotionPiece : undefined,
         };
 
         const newBoard = this.applyMoveToBoard(this.state.board, move);
 
-        // Update castling rights
         const newCastlingRights = updateCastlingRights(
             this.state.castlingRights,
             from,
@@ -93,14 +120,12 @@ export class Chess {
             capturedPiece?.color,
         );
 
-        // Update move counters
         const { halfmoveClock, fullmoveNumber } = updateMoveCounters(
             this.state,
             move,
             capturedPiece !== null || piece.type === "PAWN",
         );
 
-        // Set en passant target if pawn moved two squares
         const enPassantTarget = this.getEnPassantTarget(from, to, piece);
 
         const newState: GameState = {
@@ -112,7 +137,11 @@ export class Chess {
             halfmoveClock,
             fullmoveNumber,
             enPassantTarget,
+            positionHistory: [], // Will be updated below
         };
+
+        // Add position to history
+        newState.positionHistory = addPositionToHistory(this.state, newState);
 
         return new Chess(newState);
     }
@@ -175,7 +204,11 @@ export class Chess {
             halfmoveClock,
             fullmoveNumber,
             enPassantTarget: null,
+            positionHistory: [], // Will be updated below
         };
+
+        // Add position to history
+        newState.positionHistory = addPositionToHistory(this.state, newState);
 
         return new Chess(newState);
     }
@@ -185,18 +218,12 @@ export class Chess {
 
         // Handle pawn promotion
         let pieceToPlace = move.piece;
-        if (move.piece.type === "PAWN") {
-            const isPromotion =
-                (move.piece.color === "WHITE" && move.to.rank === 7) ||
-                (move.piece.color === "BLACK" && move.to.rank === 0);
-
-            if (isPromotion) {
-                // Default promotion to queen
-                pieceToPlace = {
-                    type: "QUEEN",
-                    color: move.piece.color,
-                };
-            }
+        if (move.promotion) {
+            // Use the specified promotion piece
+            pieceToPlace = {
+                type: move.promotion,
+                color: move.piece.color,
+            };
         }
 
         newBoard = setPieceAt(newBoard, move.to, pieceToPlace);
@@ -270,7 +297,11 @@ export class Chess {
             halfmoveClock,
             fullmoveNumber,
             enPassantTarget: null, // Clear en passant target after use
+            positionHistory: [], // Will be updated below
         };
+
+        // Add position to history
+        newState.positionHistory = addPositionToHistory(this.state, newState);
 
         return new Chess(newState);
     }
@@ -280,19 +311,68 @@ export class Chess {
         to: Square,
         piece: Piece,
     ): Square | null {
-        // Only pawns can create en passant targets
         if (piece.type !== "PAWN") return null;
 
-        // Check if pawn moved two squares forward from starting position
         const twoSquareMove = Math.abs(to.rank - from.rank) === 2;
         if (!twoSquareMove) return null;
 
         const startRank = piece.color === "WHITE" ? 1 : 6;
         if (from.rank !== startRank) return null;
 
-        // En passant target is the square the pawn "jumped over"
         const targetRank = piece.color === "WHITE" ? 2 : 5;
         return { file: to.file, rank: targetRank };
+    }
+
+    private isValidPromotionPiece(piece: PieceType): boolean {
+        return (
+            piece === "QUEEN" ||
+            piece === "ROOK" ||
+            piece === "BISHOP" ||
+            piece === "KNIGHT"
+        );
+    }
+
+    requiresPromotion(from: Square, to: Square): boolean {
+        const piece = getPieceAt(this.state.board, from);
+        if (!piece || piece.type !== "PAWN") return false;
+
+        return (
+            (piece.color === "WHITE" && to.rank === 7) ||
+            (piece.color === "BLACK" && to.rank === 0)
+        );
+    }
+
+    isPromotionMove(from: Square, to: Square): boolean {
+        const piece = getPieceAt(this.state.board, from);
+        if (!piece || piece.type !== "PAWN") return false;
+
+        return (
+            (piece.color === "WHITE" && to.rank === 7) ||
+            (piece.color === "BLACK" && to.rank === 0)
+        );
+    }
+
+    getPromotionMoves(from: Square, to: Square): Move[] {
+        if (!this.isPromotionMove(from, to)) return [];
+
+        const piece = getPieceAt(this.state.board, from);
+        if (!piece) return [];
+
+        const capturedPiece = getPieceAt(this.state.board, to);
+        const promotionPieces: PieceType[] = [
+            "QUEEN",
+            "ROOK",
+            "BISHOP",
+            "KNIGHT",
+        ];
+
+        return promotionPieces.map((promotionType) => ({
+            from,
+            to,
+            piece,
+            captured: capturedPiece || undefined,
+            promotion: promotionType,
+        }));
     }
 
     getValidMoves(): Move[] {
@@ -312,14 +392,25 @@ export class Chess {
 
                     for (const to of possibleMoves) {
                         if (isValidMove(this.state, from, to)) {
-                            moves.push({
-                                from,
-                                to,
-                                piece,
-                                captured:
-                                    getPieceAt(this.state.board, to) ||
-                                    undefined,
-                            });
+                            // Check if this is a promotion move
+                            if (this.isPromotionMove(from, to)) {
+                                // Add all promotion options
+                                const promotionMoves = this.getPromotionMoves(
+                                    from,
+                                    to,
+                                );
+                                moves.push(...promotionMoves);
+                            } else {
+                                // Regular move
+                                moves.push({
+                                    from,
+                                    to,
+                                    piece,
+                                    captured:
+                                        getPieceAt(this.state.board, to) ||
+                                        undefined,
+                                });
+                            }
                         }
                     }
                 }

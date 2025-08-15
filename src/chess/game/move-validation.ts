@@ -1,4 +1,4 @@
-import type { Board, Square, Color, Move, GameState } from "..";
+import type { Board, Square, Color, Move, GameState, PieceType } from "..";
 import { getPieceAt, setPieceAt } from "../board";
 import { isValidPieceMove } from "../pieces";
 import { isKingInCheck } from "../rules/check-detection";
@@ -34,6 +34,7 @@ export function isValidMove(
         from,
         to,
         gameState.enPassantTarget,
+        undefined, // No promotion piece for basic validation
     );
     if (isKingInCheck(testBoard, gameState.currentPlayer)) {
         return false;
@@ -84,6 +85,7 @@ export function simulateMove(
     from: Square,
     to: Square,
     enPassantTarget?: Square | null,
+    promotionPiece?: PieceType,
 ): Board {
     const piece = getPieceAt(board, from);
     if (!piece) return board;
@@ -106,7 +108,7 @@ export function simulateMove(
         newBoard = setPieceAt(newBoard, capturedPawnSquare, null);
     }
 
-    // Handle pawn promotion (default to queen)
+    // Handle pawn promotion
     let pieceToPlace = piece;
     if (piece.type === "PAWN") {
         const isPromotion =
@@ -114,8 +116,9 @@ export function simulateMove(
             (piece.color === "BLACK" && to.rank === 0);
 
         if (isPromotion) {
+            const promoteToType = promotionPiece || "QUEEN";
             pieceToPlace = {
-                type: "QUEEN",
+                type: promoteToType,
                 color: piece.color,
             };
         }
@@ -131,8 +134,15 @@ export function wouldMoveExposeKing(
     to: Square,
     kingColor: Color,
     enPassantTarget?: Square | null,
+    promotionPiece?: PieceType,
 ): boolean {
-    const testBoard = simulateMove(board, from, to, enPassantTarget);
+    const testBoard = simulateMove(
+        board,
+        from,
+        to,
+        enPassantTarget,
+        promotionPiece,
+    );
     return isKingInCheck(testBoard, kingColor);
 }
 
@@ -161,6 +171,7 @@ export function validateMoveSequence(
             move.from,
             move.to,
             currentState.enPassantTarget,
+            move.promotion,
         );
         currentState = {
             ...currentState,
@@ -177,6 +188,7 @@ export function getMoveValidationError(
     gameState: GameState,
     from: Square,
     to: Square,
+    promotionPiece?: PieceType,
 ): string | null {
     const piece = getPieceAt(gameState.board, from);
 
@@ -205,6 +217,7 @@ export function getMoveValidationError(
             to,
             gameState.currentPlayer,
             gameState.enPassantTarget,
+            promotionPiece,
         )
     ) {
         return "Move would leave king in check";
@@ -241,12 +254,14 @@ export function isKingInCheckAfterMove(
     gameState: GameState,
     from: Square,
     to: Square,
+    promotionPiece?: PieceType,
 ): boolean {
     const testBoard = simulateMove(
         gameState.board,
         from,
         to,
         gameState.enPassantTarget,
+        promotionPiece,
     );
     return isKingInCheck(testBoard, gameState.currentPlayer);
 }
