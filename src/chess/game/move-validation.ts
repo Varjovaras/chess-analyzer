@@ -34,7 +34,7 @@ export function isValidMove(
         from,
         to,
         gameState.enPassantTarget,
-        undefined, // No promotion piece for basic validation
+        undefined,
     );
     if (isKingInCheck(testBoard, gameState.currentPlayer)) {
         return false;

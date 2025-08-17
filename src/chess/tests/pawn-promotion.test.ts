@@ -48,7 +48,6 @@ describe("Pawn Promotion", () => {
 
             expect(result).not.toBeNull();
             const resultBoard = result!.getBoard();
-            // Pawn should be promoted to queen by default
             expect(resultBoard[7]![4]?.type).toBe("QUEEN");
             expect(resultBoard[7]![4]?.color).toBe("WHITE");
         });

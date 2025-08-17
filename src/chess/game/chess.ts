@@ -52,24 +52,25 @@ export class Chess {
         to: Square,
         promotionPiece?: PieceType,
     ): Chess | null {
-        if (!isValidMove(this.state, from, to, promotionPiece)) {
+        if (!isValidMove(this.state, from, to)) {
             return null;
         }
 
         const piece = getPieceAt(this.state.board, from);
         if (!piece) return null;
 
-        // Check if this is a castling move
+        if (promotionPiece && !this.isValidPromotionPiece(promotionPiece)) {
+            return null;
+        }
+
         if (isCastlingMove(from, to, piece.type)) {
             return this.makeCastlingMove(from, to);
         }
 
-        // Check if this is an en passant move
         if (this.isEnPassantMove(from, to, piece)) {
             return this.makeEnPassantMove(from, to);
         }
 
-        // Regular move
         return this.makeRegularMove(from, to, promotionPiece);
     }
 
