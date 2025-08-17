@@ -272,8 +272,6 @@ describe("Pawn Promotion", () => {
         });
 
         test("underpromotion - pawn can promote to knight", () => {
-            // Knight promotion can be useful for checks/forks that queen cannot achieve
-
             const board = createEmptyBoard();
             let testBoard = setPieceAt(
                 board,
