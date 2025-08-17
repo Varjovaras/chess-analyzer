@@ -52,7 +52,7 @@ export class Chess {
         to: Square,
         promotionPiece?: PieceType,
     ): Chess | null {
-        if (!isValidMove(this.state, from, to)) {
+        if (!isValidMove(this.state, from, to, promotionPiece)) {
             return null;
         }
 

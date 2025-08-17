@@ -192,6 +192,132 @@ describe("Chess Edge Cases and Complex Rules", () => {
             expect(game.isInCheck()).toBe(false);
             expect(game.getGameResult()).toBe("DRAW");
         });
+
+        test("Fifty-move rule", () => {
+            const board = createEmptyBoard();
+            let testBoard = setPieceAt(
+                board,
+                { file: 0, rank: 0 },
+                { type: "KING", color: "WHITE" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 7, rank: 7 },
+                { type: "KING", color: "BLACK" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 0, rank: 1 },
+                { type: "ROOK", color: "WHITE" },
+            );
+
+            const game = Chess.fromState({
+                board: testBoard,
+                currentPlayer: "WHITE",
+                moveHistory: [],
+                castlingRights: {
+                    whiteKingside: false,
+                    whiteQueenside: false,
+                    blackKingside: false,
+                    blackQueenside: false,
+                },
+                enPassantTarget: null,
+                halfmoveClock: 99,
+                fullmoveNumber: 50,
+            });
+
+            // Make a move that doesn't reset the clock
+            const newGame = game.makeMove({ file: 0, rank: 1 }, { file: 0, rank: 2 }); // Ra2
+            expect(newGame).not.toBeNull();
+            if (newGame) {
+                expect(newGame.getState().halfmoveClock).toBe(100);
+                expect(newGame.getGameResult()).toBe("DRAW");
+            }
+        });
+
+        test("Fifty-move rule", () => {
+            const board = createEmptyBoard();
+            let testBoard = setPieceAt(
+                board,
+                { file: 0, rank: 0 },
+                { type: "KING", color: "WHITE" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 7, rank: 7 },
+                { type: "KING", color: "BLACK" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 0, rank: 1 },
+                { type: "ROOK", color: "WHITE" },
+            );
+
+            const game = Chess.fromState({
+                board: testBoard,
+                currentPlayer: "WHITE",
+                moveHistory: [],
+                castlingRights: {
+                    whiteKingside: false,
+                    whiteQueenside: false,
+                    blackKingside: false,
+                    blackQueenside: false,
+                },
+                enPassantTarget: null,
+                halfmoveClock: 99,
+                fullmoveNumber: 50,
+            });
+
+            // Make a move that doesn't reset the clock
+            const newGame = game.makeMove({ file: 0, rank: 1 }, { file: 0, rank: 2 }); // Ra2
+            expect(newGame).not.toBeNull();
+            if (newGame) {
+                expect(newGame.getState().halfmoveClock).toBe(100);
+                expect(newGame.getGameResult()).toBe("DRAW");
+            }
+        });
+
+        test("Insufficient material - king and two knights vs king", () => {
+            const board = createEmptyBoard();
+            let testBoard = setPieceAt(
+                board,
+                { file: 4, rank: 4 },
+                { type: "KING", color: "WHITE" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 3, rank: 3 },
+                { type: "KNIGHT", color: "WHITE" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 5, rank: 5 },
+                { type: "KNIGHT", color: "WHITE" },
+            );
+            testBoard = setPieceAt(
+                testBoard,
+                { file: 0, rank: 0 },
+                { type: "KING", color: "BLACK" },
+            );
+
+            const game = Chess.fromState({
+                board: testBoard,
+                currentPlayer: "WHITE",
+                moveHistory: [],
+                castlingRights: {
+                    whiteKingside: false,
+                    whiteQueenside: false,
+                    blackKingside: false,
+                    blackQueenside: false,
+                },
+                enPassantTarget: null,
+                halfmoveClock: 0,
+                fullmoveNumber: 1,
+            });
+
+            // Should be ongoing, as checkmate is possible (though difficult)
+            expect(game.getGameResult()).toBe("ONGOING");
+        });
     });
 
     describe("Complex Pawn Promotion Scenarios", () => {
