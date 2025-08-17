@@ -10,7 +10,7 @@ export {
     isSquareEmpty,
     getSquaresByColor,
     findKing,
-} from './board';
+} from "./board";
 
 export {
     algebraicToSquare,
@@ -18,4 +18,4 @@ export {
     parseSquareList,
     formatSquareList,
     isValidAlgebraicNotation,
-} from './notation';
+} from "./notation";

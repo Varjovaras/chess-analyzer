@@ -165,8 +165,6 @@ export function isThreefoldRepetition(
     positionHistory: string[],
     currentPosition: string,
 ): boolean {
-    // Count occurrences of the current position in history
-    // The position counts as occurring when it appears 3 times total
     const occurrences = countPositionOccurrences(
         positionHistory,
         currentPosition,

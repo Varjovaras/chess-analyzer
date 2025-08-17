@@ -1,5 +1,10 @@
 import type { Square } from "..";
-import { fileCharToIndex, rankCharToIndex, fileIndexToChar, rankIndexToChar } from "../utils/string";
+import {
+    fileCharToIndex,
+    rankCharToIndex,
+    fileIndexToChar,
+    rankIndexToChar,
+} from "../utils/string";
 import { isValidSquare } from "./board";
 
 export function algebraicToSquare(algebraic: string): Square | null {
@@ -32,7 +37,7 @@ export function parseSquareList(algebraicList: string[]): Square[] {
 }
 
 export function formatSquareList(squares: Square[]): string[] {
-    return squares.map(squareToAlgebraic).filter(notation => notation !== "");
+    return squares.map(squareToAlgebraic).filter((notation) => notation !== "");
 }
 
 export function isValidAlgebraicNotation(notation: string): boolean {

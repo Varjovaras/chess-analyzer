@@ -32,13 +32,15 @@ export function getAttackingPieces(
 
             if (piece && piece.color === byColor) {
                 if (isSquareUnderAttackBy(board, targetSquare, byColor)) {
-                    // We need a more specific check here to verify this exact piece is attacking
-                    // For now, we'll use the general attack detection
-                    // This could be improved by checking piece-specific attack patterns
+                    // Test if this specific piece is attacking by temporarily removing it
+                    // If removing this piece stops the attack, then it was an attacker
                     const testBoard = board.map((rank) => [...rank]);
-                    testBoard[square.rank]![square.file] = null;
+                    const rankArray = testBoard[square.rank];
+                    if (!rankArray) {
+                        return attackers;
+                    }
+                    rankArray[square.file] = null;
 
-                    // If removing this piece stops the attack, then this piece was attacking
                     if (
                         !isSquareUnderAttackBy(testBoard, targetSquare, byColor)
                     ) {
@@ -88,7 +90,9 @@ export function canBlockCheck(
     // No check to block
     if (checkingPieces.length === 0) return false;
 
-    const checkingPiece = checkingPieces[0]!;
+    const checkingPiece = checkingPieces[0];
+    if (!checkingPiece) return false;
+
     const checkingPieceData = getPieceAt(board, checkingPiece);
 
     if (!checkingPieceData) return false;
@@ -119,7 +123,8 @@ export function isSquareOnLineBetween(
     if (dx1 !== 0) {
         const t = dx2 / dx1;
         return t > 0 && t < 1 && dy2 === t * dy1;
-    } else if (dy1 !== 0) {
+    }
+    if (dy1 !== 0) {
         const t = dy2 / dy1;
         return t > 0 && t < 1 && dx2 === t * dx1;
     }
@@ -139,8 +144,12 @@ export function wouldMoveResolveCheck(
 
     // Create a copy of the board with the move applied
     const testBoard = board.map((rank) => [...rank]);
-    testBoard[fromSquare.rank]![fromSquare.file] = null;
-    testBoard[toSquare.rank]![toSquare.file] = piece;
+    const fromRank = testBoard[fromSquare.rank];
+    const toRank = testBoard[toSquare.rank];
+    if (!fromRank || !toRank) return false;
+
+    fromRank[fromSquare.file] = null;
+    toRank[toSquare.file] = piece;
 
     // Check if the king is still in check after the move
     return !isKingInCheck(testBoard, kingColor);
@@ -160,7 +169,9 @@ export function isPiecePinned(
 
     // Remove the piece temporarily and see if king comes under attack
     const testBoard = board.map((rank) => [...rank]);
-    testBoard[pieceSquare.rank]![pieceSquare.file] = null;
+    const pieceRank = testBoard[pieceSquare.rank];
+    if (!pieceRank) return false;
+    pieceRank[pieceSquare.file] = null;
 
     const opponentColor = kingColor === "WHITE" ? "BLACK" : "WHITE";
     return (

@@ -16,7 +16,6 @@ export function getPawnMoves(
     if (isValidSquare(oneForward) && isSquareEmpty(board, oneForward)) {
         moves.push(oneForward);
 
-        // Two squares forward from starting position
         if (square.rank === startRank) {
             const twoForward = {
                 file: square.file,
@@ -28,7 +27,6 @@ export function getPawnMoves(
         }
     }
 
-    // Captures (diagonal)
     const captureLeft = {
         file: square.file - 1,
         rank: square.rank + direction,
@@ -59,14 +57,11 @@ export function getPawnMoves(
         moves.push(captureRight);
     }
 
-    // En passant captures
     if (enPassantTarget) {
         const enPassantRank = color === "WHITE" ? 5 : 2; // 6th rank for white, 3rd rank for black
         const pawnRank = color === "WHITE" ? 4 : 3; // 5th rank for white, 4th rank for black
 
-        // Check if pawn is on the correct rank for en passant
         if (square.rank === pawnRank) {
-            // Check if en passant target is diagonally adjacent
             if (
                 enPassantTarget.rank === enPassantRank &&
                 Math.abs(enPassantTarget.file - square.file) === 1
@@ -86,7 +81,6 @@ export function isPawnAttackingSquare(
 ): boolean {
     const direction = pawnColor === "WHITE" ? 1 : -1;
 
-    // Check diagonal captures
     const captureLeft = {
         file: pawnSquare.file - 1,
         rank: pawnSquare.rank + direction,

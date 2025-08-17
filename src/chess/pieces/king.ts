@@ -1,7 +1,11 @@
 import type { Board, Square, Color } from "..";
 import { isValidSquare, isSquareOccupiedBy } from "../board";
 
-export function getKingMoves(board: Board, square: Square, color: Color): Square[] {
+export function getKingMoves(
+    board: Board,
+    square: Square,
+    color: Color,
+): Square[] {
     const moves: Square[] = [];
     const kingMoves = [
         { file: 0, rank: 1 },
@@ -32,7 +36,7 @@ export function getKingMoves(board: Board, square: Square, color: Color): Square
 
 export function isKingAttackingSquare(
     kingSquare: Square,
-    targetSquare: Square
+    targetSquare: Square,
 ): boolean {
     const kingMoves = [
         { file: 0, rank: 1 },

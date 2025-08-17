@@ -227,7 +227,10 @@ describe("Chess Edge Cases and Complex Rules", () => {
             });
 
             // Make a move that doesn't reset the clock
-            const newGame = game.makeMove({ file: 0, rank: 1 }, { file: 0, rank: 2 }); // Ra2
+            const newGame = game.makeMove(
+                { file: 0, rank: 1 },
+                { file: 0, rank: 2 },
+            ); // Ra2
             expect(newGame).not.toBeNull();
             if (newGame) {
                 expect(newGame.getState().halfmoveClock).toBe(100);
@@ -269,7 +272,10 @@ describe("Chess Edge Cases and Complex Rules", () => {
             });
 
             // Make a move that doesn't reset the clock
-            const newGame = game.makeMove({ file: 0, rank: 1 }, { file: 0, rank: 2 }); // Ra2
+            const newGame = game.makeMove(
+                { file: 0, rank: 1 },
+                { file: 0, rank: 2 },
+            ); // Ra2
             expect(newGame).not.toBeNull();
             if (newGame) {
                 expect(newGame.getState().halfmoveClock).toBe(100);

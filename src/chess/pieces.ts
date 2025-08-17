@@ -15,4 +15,4 @@ export {
     isQueenAttackingSquare,
     getKingMoves,
     isKingAttackingSquare,
-} from './pieces/index';
+} from "./pieces/index";

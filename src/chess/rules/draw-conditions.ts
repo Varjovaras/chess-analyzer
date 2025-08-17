@@ -192,7 +192,7 @@ export function evaluateDrawConditions(
         return true;
     }
 
-    // Check threefold repetition (simplified)
+    // Check threefold repetition
     if (isThreefoldRepetition(gameState)) {
         return true;
     }
@@ -207,7 +207,7 @@ export function getTotalMaterialValue(board: Board, color: Color): number {
         BISHOP: 3,
         ROOK: 5,
         QUEEN: 9,
-        KING: 0, // King has no material value for this calculation
+        KING: 0,
     };
 
     let totalValue = 0;

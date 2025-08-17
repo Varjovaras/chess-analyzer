@@ -13,25 +13,25 @@ export function canCastleKingside(
     board: Board,
     color: Color,
     castlingRights: CastlingRights,
-    isInCheck: boolean
+    isInCheck: boolean,
 ): boolean {
-    // Can't castle if in check
     if (isInCheck) return false;
 
-    const rights = color === "WHITE" ? castlingRights.whiteKingside : castlingRights.blackKingside;
+    const rights =
+        color === "WHITE"
+            ? castlingRights.whiteKingside
+            : castlingRights.blackKingside;
     if (!rights) return false;
 
     const rank = color === "WHITE" ? 0 : 7;
     const kingSquare = { file: 4, rank };
     const rookSquare = { file: 7, rank };
 
-    // Verify king is in starting position
     const king = getPieceAt(board, kingSquare);
     if (!king || king.type !== "KING" || king.color !== color) {
         return false;
     }
 
-    // Check if rook exists in starting position
     const rook = getPieceAt(board, rookSquare);
     if (!rook || rook.type !== "ROOK" || rook.color !== color) {
         return false;
@@ -60,25 +60,26 @@ export function canCastleQueenside(
     board: Board,
     color: Color,
     castlingRights: CastlingRights,
-    isInCheck: boolean
+    isInCheck: boolean,
 ): boolean {
     // Can't castle if in check
     if (isInCheck) return false;
 
-    const rights = color === "WHITE" ? castlingRights.whiteQueenside : castlingRights.blackQueenside;
+    const rights =
+        color === "WHITE"
+            ? castlingRights.whiteQueenside
+            : castlingRights.blackQueenside;
     if (!rights) return false;
 
     const rank = color === "WHITE" ? 0 : 7;
     const kingSquare = { file: 4, rank };
     const rookSquare = { file: 0, rank };
 
-    // Verify king is in starting position
     const king = getPieceAt(board, kingSquare);
     if (!king || king.type !== "KING" || king.color !== color) {
         return false;
     }
 
-    // Check if rook exists in starting position
     const rook = getPieceAt(board, rookSquare);
     if (!rook || rook.type !== "ROOK" || rook.color !== color) {
         return false;
@@ -110,7 +111,7 @@ export function updateCastlingRights(
     pieceType: string,
     pieceColor: Color,
     capturedPieceType?: string,
-    capturedPieceColor?: Color
+    capturedPieceColor?: Color,
 ): CastlingRights {
     const newRights = { ...currentRights };
 
@@ -154,17 +155,15 @@ export function getCastlingMoves(
     board: Board,
     color: Color,
     castlingRights: CastlingRights,
-    isInCheck: boolean
+    isInCheck: boolean,
 ): Square[] {
     const moves: Square[] = [];
     const kingRank = color === "WHITE" ? 0 : 7;
 
-    // Check kingside castling
     if (canCastleKingside(board, color, castlingRights, isInCheck)) {
         moves.push({ file: 6, rank: kingRank });
     }
 
-    // Check queenside castling
     if (canCastleQueenside(board, color, castlingRights, isInCheck)) {
         moves.push({ file: 2, rank: kingRank });
     }
@@ -172,7 +171,11 @@ export function getCastlingMoves(
     return moves;
 }
 
-export function isCastlingMove(from: Square, to: Square, pieceType: string): boolean {
+export function isCastlingMove(
+    from: Square,
+    to: Square,
+    pieceType: string,
+): boolean {
     return (
         pieceType === "KING" &&
         Math.abs(to.file - from.file) === 2 &&
@@ -180,8 +183,11 @@ export function isCastlingMove(from: Square, to: Square, pieceType: string): boo
     );
 }
 
-export function getCastlingType(from: Square, to: Square): 'KINGSIDE' | 'QUEENSIDE' | null {
+export function getCastlingType(
+    from: Square,
+    to: Square,
+): "KINGSIDE" | "QUEENSIDE" | null {
     if (!isCastlingMove(from, to, "KING")) return null;
 
-    return to.file === 6 ? 'KINGSIDE' : 'QUEENSIDE';
+    return to.file === 6 ? "KINGSIDE" : "QUEENSIDE";
 }

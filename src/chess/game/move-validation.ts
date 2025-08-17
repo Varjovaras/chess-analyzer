@@ -15,16 +15,13 @@ export function isValidMove(
 ): boolean {
     const piece = getPieceAt(gameState.board, from);
 
-    // Basic validation
     if (!piece) return false;
     if (piece.color !== gameState.currentPlayer) return false;
 
-    // Check if this is a castling move
     if (isCastlingMove(from, to, piece.type)) {
         return isValidCastlingMove(gameState, from, to);
     }
 
-    // Check if the piece can legally move to the target square
     if (!isValidPieceMove(gameState.board, from, to, gameState.enPassantTarget))
         return false;
 
@@ -34,7 +31,6 @@ export function isValidMove(
         from,
         to,
         gameState.enPassantTarget,
-        undefined,
     );
     if (isKingInCheck(testBoard, gameState.currentPlayer)) {
         return false;
@@ -92,14 +88,13 @@ export function simulateMove(
 
     let newBoard = setPieceAt(board, from, null);
 
-    // Handle en passant capture
     if (
         piece.type === "PAWN" &&
         enPassantTarget &&
         to.file === enPassantTarget.file &&
         to.rank === enPassantTarget.rank
     ) {
-        // Remove the captured pawn (not at the destination square)
+        // Remove the captured pawn during en passant
         const capturedPawnRank = piece.color === "WHITE" ? 4 : 3;
         const capturedPawnSquare = {
             file: enPassantTarget.file,
@@ -109,6 +104,7 @@ export function simulateMove(
     }
 
     // Handle pawn promotion
+
     let pieceToPlace = piece;
     if (piece.type === "PAWN") {
         const isPromotion =
@@ -165,7 +161,6 @@ export function validateMoveSequence(
             };
         }
 
-        // Apply the move (simplified - in practice would use the full game logic)
         const newBoard = simulateMove(
             currentState.board,
             move.from,

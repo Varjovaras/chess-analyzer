@@ -1,7 +1,11 @@
 import type { Board, Color, Square } from "..";
 import { isValidSquare, isSquareEmpty, isSquareOccupiedBy } from "../board";
 
-export function getBishopMoves(board: Board, square: Square, color: Color): Square[] {
+export function getBishopMoves(
+    board: Board,
+    square: Square,
+    color: Color,
+): Square[] {
     const moves: Square[] = [];
     const directions = [
         { file: 1, rank: 1 }, // up-right
@@ -20,7 +24,7 @@ export function getBishopMoves(board: Board, square: Square, color: Color): Squa
 export function isBishopAttackingSquare(
     bishopSquare: Square,
     targetSquare: Square,
-    board: Board
+    board: Board,
 ): boolean {
     // Check if target is on same diagonal
     const fileDiff = Math.abs(bishopSquare.file - targetSquare.file);
@@ -30,7 +34,6 @@ export function isBishopAttackingSquare(
         return false; // Not on same diagonal
     }
 
-    // Check if path is clear
     const directions = [
         { file: 1, rank: 1 }, // up-right
         { file: 1, rank: -1 }, // down-right
@@ -45,13 +48,15 @@ export function isBishopAttackingSquare(
         };
 
         while (isValidSquare(current)) {
-            if (current.file === targetSquare.file && current.rank === targetSquare.rank) {
-                return true; // Found target square along this line
+            if (
+                current.file === targetSquare.file &&
+                current.rank === targetSquare.rank
+            ) {
+                return true;
             }
 
-            // If we encounter any piece on an intermediate square, the path is blocked
             if (!isSquareEmpty(board, current)) {
-                break; // Path is blocked by an intermediate piece
+                break;
             }
 
             current.file += dir.file;
@@ -78,12 +83,10 @@ function getLineMoves(
         if (isSquareEmpty(board, current)) {
             moves.push({ ...current });
         } else {
-            // Blocked by a piece
             if (!isSquareOccupiedBy(board, current, color)) {
-                // Can capture opponent's piece
                 moves.push({ ...current });
             }
-            break; // Stop sliding in this direction
+            break;
         }
 
         current.file += direction.file;
